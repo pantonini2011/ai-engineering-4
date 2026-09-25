@@ -1,0 +1,39 @@
+$ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?"
+00:07:43 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+00:07:43 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+00:07:46 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+
+Consulta: ¿Cómo agrego headers personalizados a la respuesta?
+Top-5 híbrido (BM25 + Pinecone):
+  1. handling-errors#002        [errores] 'El response resultante'  (de: bm25+vector)
+  2. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
+  3. cors#002                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25)
+  4. cors#003                   [seguridad] 'Usa `CORSMiddleware`'  (de: vector)
+  5. cors#004                   [seguridad] 'Requests de preflight CORS'  (de: bm25)
+
+$ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?" --categoria seguridad
+00:07:52 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+00:07:52 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+00:07:54 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+
+Consulta: ¿Cómo agrego headers personalizados a la respuesta?
+Filtro de metadata: {"category": "seguridad"}
+Top-5 híbrido (BM25 + Pinecone):
+  1. cors#002                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
+  2. cors#004                   [seguridad] 'Requests de preflight CORS'  (de: bm25+vector)
+  3. cors#003                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
+  4. cors#001                   [seguridad] 'CORS (Cross-Origin Resource Sharing)'  (de: bm25+vector)
+  5. security#001               [seguridad] 'Seguridad'  (de: bm25)
+
+$ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?" --filtro '{"doc_id": {"$in": ["handling-errors", "middleware"]}, "page": {"$lte": 2}}'
+00:08:00 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+00:08:00 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+00:08:02 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+
+Consulta: ¿Cómo agrego headers personalizados a la respuesta?
+Filtro de metadata: {"doc_id": {"$in": ["handling-errors", "middleware"]}, "page": {"$lte": 2}}
+Top-5 híbrido (BM25 + Pinecone):
+  1. handling-errors#002        [errores] 'El response resultante'  (de: bm25+vector)
+  2. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
+  3. middleware#002             [infraestructura] 'Antes y después de la `response`'  (de: bm25+vector)
+  4. handling-errors#001        [errores] 'Manejo de Errores'  (de: bm25+vector)

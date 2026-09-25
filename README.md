@@ -46,7 +46,7 @@ ai-engineering-4/
 ├── data/
 │   ├── docs/                # 12 páginas del tutorial de FastAPI en español (licencia MIT)
 │   └── golden_set.json      # 5 pares {"pregunta", "documento_id_esperado"}
-├── tests/                   # 24 tests con fakes (no llaman a ninguna API)
+├── tests/                   # 41 tests con fakes (no llaman a ninguna API)
 │   ├── test_setup_index.py
 │   ├── test_ingestion.py
 │   ├── test_rag_system.py
@@ -158,9 +158,32 @@ filtrar dentro del namespace (ver el esquema completo en la [sección 4](#4-esqu
 | `env` | `{"env": "prod"}` | Control extra si alguna vez se mezclan entornos |
 | `created_at` | — | Detectar si el índice está desactualizado respecto de `data/docs/` |
 
-Estos filtros se pasan a la búsqueda vectorial con
-`vectorstore.as_retriever(search_kwargs={"k": 5, "filter": {...}})`. La evaluación no los
-usa: mide la recuperación sobre todo el namespace.
+**Filtrado en la recuperación híbrida.** `RAGSystem.retrieve(query, filtro=...)` recibe un
+filtro con la sintaxis de metadata de Pinecone (`{"campo": valor}`, `$eq`, `$ne`, `$gt`,
+`$gte`, `$lt`, `$lte`, `$in`, `$nin`, `$and`, `$or`) y lo aplica a **los dos**
+recuperadores:
+
+- **Vectorial:** el filtro va a Pinecone (`similarity_search(..., filter=filtro)`), que lo
+  aplica del lado del servidor dentro del namespace.
+- **BM25:** corre en memoria, así que `cumple_filtro()` evalúa el mismo filtro sobre la
+  metadata de cada chunk.
+- **Fusión:** RRF con los mismos pesos (`EnsembleRetriever.weighted_reciprocal_rank()`).
+
+En los dos casos el filtro se aplica **antes** de cortar el top-5: el resultado sale completo
+del subconjunto filtrado y no de un top-5 general al que después se le sacan elementos (que
+podría quedar vacío).
+
+```python
+rag = RAGSystem()
+rag.retrieve("¿Cómo agrego headers personalizados?", filtro={"category": "seguridad"})
+rag.retrieve("...", filtro={"doc_id": {"$in": ["handling-errors", "middleware"]}, "page": {"$lte": 2}})
+```
+
+Ejemplo real ([`evidencia/07_consulta_con_filtros.txt`](evidencia/07_consulta_con_filtros.txt)):
+sin filtro, "¿Cómo agrego headers personalizados a la respuesta?" mezcla chunks de `errores`,
+`infraestructura` y `seguridad`. Con `--categoria seguridad`, los 5 resultados son de
+seguridad. Con el filtro `$in` + `page $lte 2` salen solo 4, porque son los únicos chunks
+que lo cumplen. La evaluación no usa filtros: mide la recuperación sobre todo el namespace.
 
 ### 3.5 Otras decisiones
 
@@ -275,6 +298,11 @@ python -m src.ingestion --reset    # vacía el namespace y re-indexa todo
 # Recuperación: top-5 híbrido para una consulta
 python -m src.rag_system "¿Cómo agrego CORSMiddleware con allow_origins?"
 
+# Recuperación con filtro de metadata (por categoría, o cualquier filtro de Pinecone en JSON)
+python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?" --categoria seguridad
+python -m src.rag_system "¿Cómo agrego headers?" --filtro '{"page": {"$lte": 1}}'        # bash / Linux / macOS
+python -m src.rag_system "¿Cómo agrego headers?" --filtro '{\"page\": {\"$lte\": 1}}'    # PowerShell 5.1
+
 # Evaluación: Precision@5 y Recall@5 sobre el golden set
 python evaluate.py
 ```
@@ -285,7 +313,7 @@ Qué hace cada comando sobre Pinecone:
 |---|---|---|
 | `src.setup_index` | `list_indexes()` y, si falta, `create_index(dimension=1536, metric="cosine", spec=ServerlessSpec("aws", "us-east-1"))`. Espera a que esté listo y valida dimensión y métrica. | `Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine` |
 | `src.ingestion` | `ensure_index()` (mismo chequeo) + `upsert` por lotes de 100 en el namespace, con reintentos | `12 documentos -> 65 chunks` · `Ingesta completa: 65 vectores subidos; namespace 'dev' ... tiene 65.` |
-| `src.rag_system` | `list` + `fetch` del namespace (corpus de BM25) y `query` vectorial | Top-5 con la categoría y la sección de cada chunk, y qué recuperador lo trajo (`bm25`, `vector` o ambos) |
+| `src.rag_system` | `list` + `fetch` del namespace (corpus de BM25) y `query` vectorial (con `filter` si se pasa `--categoria` o `--filtro`) | Top-5 con la categoría y la sección de cada chunk, y qué recuperador lo trajo (`bm25`, `vector` o ambos) |
 | `evaluate.py` | Igual que `src.rag_system`, para las 5 preguntas y los 3 modos | Detalle por pregunta, tabla de métricas y resumen |
 
 La salida real de cada comando está en [`evidencia/`](evidencia/).
@@ -357,14 +385,14 @@ en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precisi
 pytest -v
 ```
 
-Los 24 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
+Los 41 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
 red ni API keys: reemplazan Pinecone por objetos fake, así que se pueden correr sin `.env`.
 
 | Archivo | Qué verifica |
 |---|---|
 | [`tests/test_setup_index.py`](tests/test_setup_index.py) | Crea el índice si no existe, no lo recrea si existe, detecta mismatch de dimensión y de métrica |
 | [`tests/test_ingestion.py`](tests/test_ingestion.py) | Limpieza de Markdown, chunks de 600 tokens como máximo, esquema de metadata, upsert por lotes con el texto en la metadata, reintentos y rechazo de dimensión incorrecta |
-| [`tests/test_rag_system.py`](tests/test_rag_system.py) | Tokenizer de BM25 (stopwords, tildes, identificadores), BM25 matchea nombres técnicos, corpus reconstruido desde la metadata de Pinecone |
+| [`tests/test_rag_system.py`](tests/test_rag_system.py) | Tokenizer de BM25 (stopwords, tildes, identificadores), BM25 matchea nombres técnicos, corpus reconstruido desde la metadata de Pinecone, `cumple_filtro()` con la sintaxis de Pinecone (13 casos) y `retrieve(filtro=...)`: el filtro llega a Pinecone, BM25 filtra antes de cortar el top-k, sin coincidencias devuelve lista vacía |
 | [`tests/test_evaluate.py`](tests/test_evaluate.py) | Cálculo de Precision@k, Recall@k y MRR, y validez del golden set (5 preguntas con documentos que existen) |
 
 Verificaciones contra Pinecone real, en [`evidencia/`](evidencia/README.md):
@@ -374,6 +402,7 @@ Verificaciones contra Pinecone real, en [`evidencia/`](evidencia/README.md):
 | [`01_ingesta.txt`](evidencia/01_ingesta.txt) | Validación del índice (1536 dims, coseno), 65 chunks subidos |
 | [`02_ingesta_idempotente.txt`](evidencia/02_ingesta_idempotente.txt) | La segunda corrida no re-indexa |
 | [`03_consulta_hibrida.txt`](evidencia/03_consulta_hibrida.txt) | Top-5 híbrido con el origen de cada resultado |
+| [`07_consulta_con_filtros.txt`](evidencia/07_consulta_con_filtros.txt) | La misma consulta sin filtro, con `--categoria` y con un filtro `$in` + `$lte` |
 | [`04_evaluacion.txt`](evidencia/04_evaluacion.txt) | Métricas completas |
 | [`06_esquema_vector.txt`](evidencia/06_esquema_vector.txt) | Vector real guardado (metadata con texto) y conteo por namespace |
 
@@ -409,7 +438,7 @@ evidencia.
 | Dataset de documentación técnica de una librería de Python | [`data/docs/`](data/docs/) (FastAPI, en español) | `12 documentos -> 65 chunks` |
 | Chunks con `RecursiveCharacterTextSplitter` | `ingestion.split_documents()` | Log `min=33, prom=427, max=592` tokens |
 | Embeddings insertados con contenido y fuente en la metadata | `ingestion.upsert_chunks()` | `06_esquema_vector.txt` |
-| Clase `RAGSystem` con `EnsembleRetriever` que devuelve el top-5 | `RAGSystem.retrieve()` | `03_consulta_hibrida.txt` |
+| Clase `RAGSystem` con `EnsembleRetriever` que devuelve el top-5 | `RAGSystem.retrieve(query, filtro=None)` | `03_consulta_hibrida.txt`, `07_consulta_con_filtros.txt` |
 | `evaluate.py` con benchmark de 5 preguntas | [`evaluate.py`](evaluate.py) | `04_evaluacion.txt` |
 | Recall@5 | `QueryResult.recall()` | **1.00** |
 | Precision@5 | `QueryResult.precision()` | **0.76** (techo 0.84) |
