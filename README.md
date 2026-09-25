@@ -505,18 +505,77 @@ Resumen: el recuperador híbrido encontró el documento correcto en 5/5 pregunta
 ## 7. Tests y verificaciones
 
 ```bash
-pytest -v
+python -m pytest -v
 ```
 
 Los 47 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
 red ni API keys: reemplazan Pinecone por objetos fake, así que se pueden correr sin `.env`.
+Sin `-v`, pytest muestra solo un punto por test que pasa; con `-v`, el nombre de cada uno.
 
 | Archivo | Tests | Qué verifica |
 |---|---|---|
 | [`tests/test_setup_index.py`](tests/test_setup_index.py) | 4 | Crea el índice si no existe, no lo recrea si existe, detecta mismatch de dimensión y de métrica |
 | [`tests/test_ingestion.py`](tests/test_ingestion.py) | 9 | Limpieza de Markdown, chunks de 600 tokens como máximo, esquema de metadata, upsert por lotes con el texto en la metadata, reintentos y rechazo de dimensión incorrecta |
-| [`tests/test_rag_system.py`](tests/test_rag_system.py) | 27 | Tokenizer de BM25 (stopwords, tildes, identificadores), BM25 matchea nombres técnicos, corpus reconstruido desde la metadata de Pinecone, `cumple_filtro()` con la sintaxis de Pinecone (13 casos) y `retrieve(filtro=...)`: el filtro llega a Pinecone, BM25 filtra antes de cortar el top-k, sin coincidencias devuelve lista vacía. **Umbral de relevancia:** BM25 descarta los chunks con score 0 y una pregunta fuera del dominio (similitud máxima debajo de `MIN_SIMILITUD`) devuelve lista vacía. **Score combinado:** `retrieve_con_scores()` da el mismo orden que `retrieve()` y un score igual a la fórmula RRF, y respeta el filtro. **Salida JSON:** `resultado_json()` incluye namespace, fuente, `page`, categoría, score, similitud y extracto, y explica por qué no hay resultados cuando la lista viene vacía |
+| [`tests/test_rag_system.py`](tests/test_rag_system.py) | 27 | Tokenizer de BM25 (stopwords, tildes, identificadores), BM25 matchea nombres técnicos, corpus reconstruido desde la metadata de Pinecone, `cumple_filtro()` con la sintaxis de Pinecone (12 casos parametrizados más el rechazo de un operador desconocido) y `retrieve(filtro=...)`: el filtro llega a Pinecone, BM25 filtra antes de cortar el top-k, sin coincidencias devuelve lista vacía. **Umbral de relevancia:** BM25 descarta los chunks con score 0 y una pregunta fuera del dominio (similitud máxima debajo de `MIN_SIMILITUD`) devuelve lista vacía. **Score combinado:** `retrieve_con_scores()` da el mismo orden que `retrieve()` y un score igual a la fórmula RRF, y respeta el filtro. **Salida JSON:** `resultado_json()` incluye namespace, fuente, `page`, categoría, score, similitud y extracto, y explica por qué no hay resultados cuando la lista viene vacía |
 | [`tests/test_evaluate.py`](tests/test_evaluate.py) | 7 | Cálculo de Precision@k, Recall@k y MRR, y validez del golden set (5 preguntas con documentos que existen) |
+
+Salida de `python -m pytest -v`:
+
+<details>
+<summary>Ver los 47 tests</summary>
+
+```
+tests/test_evaluate.py::test_metricas_por_pregunta PASSED
+tests/test_evaluate.py::test_precision_divide_por_k_aunque_vengan_menos_resultados PASSED
+tests/test_evaluate.py::test_sin_acierto PASSED
+tests/test_evaluate.py::test_summarize_promedia PASSED
+tests/test_evaluate.py::test_evaluate_usa_doc_id_de_la_metadata PASSED
+tests/test_evaluate.py::test_golden_set_real_tiene_5_preguntas_con_documentos_existentes PASSED
+tests/test_evaluate.py::test_golden_set_invalido PASSED
+tests/test_ingestion.py::test_clean_markdown_quita_anclas_e_includes PASSED
+tests/test_ingestion.py::test_section_at_devuelve_ultimo_encabezado_previo PASSED
+tests/test_ingestion.py::test_load_documents_asigna_doc_id_fuente_y_categoria PASSED
+tests/test_ingestion.py::test_split_documents_respeta_tamanio_y_esquema_de_metadata PASSED
+tests/test_ingestion.py::test_upsert_por_lotes_con_texto_en_metadata PASSED
+tests/test_ingestion.py::test_upsert_rechaza_dimension_incorrecta PASSED
+tests/test_ingestion.py::test_upsert_reintenta_errores_transitorios PASSED
+tests/test_ingestion.py::test_upsert_se_rinde_tras_max_reintentos PASSED
+tests/test_ingestion.py::test_namespace_count_lee_stats_del_namespace PASSED
+tests/test_rag_system.py::test_tokenizer_conserva_identificadores_y_quita_stopwords PASSED
+tests/test_rag_system.py::test_tokenizer_ignora_tildes PASSED
+tests/test_rag_system.py::test_bm25_matchea_nombres_tecnicos_exactos PASSED
+tests/test_rag_system.py::test_corpus_bm25_se_reconstruye_desde_metadata_de_pinecone PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[None-True] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro1-True] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro2-True] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro3-False] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro4-True] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro5-False] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro6-True] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro7-False] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro8-False] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro9-True] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro10-False] PASSED
+tests/test_rag_system.py::test_cumple_filtro_sintaxis_pinecone[filtro11-False] PASSED
+tests/test_rag_system.py::test_cumple_filtro_rechaza_operador_desconocido PASSED
+tests/test_rag_system.py::test_retrieve_sin_filtro_usa_todo_el_corpus PASSED
+tests/test_rag_system.py::test_retrieve_con_filtro_solo_devuelve_chunks_que_cumplen PASSED
+tests/test_rag_system.py::test_bm25_filtra_antes_de_cortar_el_top_k PASSED
+tests/test_rag_system.py::test_bm25_descarta_chunks_sin_terminos_en_comun PASSED
+tests/test_rag_system.py::test_filtro_sin_coincidencias_devuelve_lista_vacia PASSED
+tests/test_rag_system.py::test_pregunta_fuera_del_dominio_devuelve_lista_vacia PASSED
+tests/test_rag_system.py::test_retrieve_con_scores_mismo_orden_que_retrieve_y_score_rrf PASSED
+tests/test_rag_system.py::test_retrieve_con_scores_respeta_el_filtro PASSED
+tests/test_rag_system.py::test_resultado_json_incluye_metadata_score_y_namespace PASSED
+tests/test_rag_system.py::test_resultado_json_sin_resultados_explica_por_que PASSED
+tests/test_setup_index.py::test_crea_indice_serverless_si_no_existe PASSED
+tests/test_setup_index.py::test_no_recrea_indice_existente PASSED
+tests/test_setup_index.py::test_detecta_mismatch_de_dimensiones PASSED
+tests/test_setup_index.py::test_detecta_metrica_distinta PASSED
+47 passed in 2.93s
+```
+
+</details>
 
 Verificaciones contra Pinecone real, en [`evidencia/`](evidencia/README.md):
 
