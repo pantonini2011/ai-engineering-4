@@ -1,6 +1,6 @@
-23:46:54 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-23:46:54 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-23:46:57 INFO src.rag_system: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+17:36:18 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:36:18 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:36:20 INFO src.rag_system: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
 ==============================================================================
 EVALUACIÓN DEL RECUPERADOR — índice 'fastapi-docs-rag', namespace 'dev'
@@ -12,27 +12,27 @@ Detalle por pregunta (modo híbrido):
 [1] ¿Cómo permito que un frontend que corre en otro origen llame a mi API desde el navegador?
     esperado: cors
     top-5:   ['cors', 'handling-errors', 'cors', 'first-steps', 'cors']
-    relevantes: ✔ · ✔ · ✔  ->  Recall@5=1  Precision@5=0.60  RR=1.00
+    relevantes: ✔ · ✔ · ✔  ->  Hit: SÍ  Recall@5=1  Precision@5=0.60  RR=1.00
 
 [2] ¿Cómo envío una notificación por email después de devolver la respuesta, sin que el cliente tenga que esperar?
     esperado: background-tasks
     top-5:   ['background-tasks', 'background-tasks', 'handling-errors', 'sql-databases', 'middleware']
-    relevantes: ✔ ✔ · · ·  ->  Recall@5=1  Precision@5=0.40  RR=1.00
+    relevantes: ✔ ✔ · · ·  ->  Hit: SÍ  Recall@5=1  Precision@5=0.40  RR=1.00
 
 [3] ¿Qué hace include_router y cómo divido mi aplicación en varios archivos?
     esperado: bigger-applications
     top-5:   ['bigger-applications', 'bigger-applications', 'bigger-applications', 'bigger-applications', 'bigger-applications']
-    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Recall@5=1  Precision@5=1.00  RR=1.00
+    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Hit: SÍ  Recall@5=1  Precision@5=1.00  RR=1.00
 
 [4] ¿Cómo devuelvo un error 404 con HTTPException cuando no se encuentra un item?
     esperado: handling-errors
     top-5:   ['handling-errors', 'handling-errors', 'handling-errors', 'handling-errors', 'body']
-    relevantes: ✔ ✔ ✔ ✔ ·  ->  Recall@5=1  Precision@5=0.80  RR=1.00
+    relevantes: ✔ ✔ ✔ ✔ ·  ->  Hit: SÍ  Recall@5=1  Precision@5=0.80  RR=1.00
 
 [5] ¿Cómo creo una dependencia de Session de SQLModel para guardar un Hero en la base de datos?
     esperado: sql-databases
     top-5:   ['sql-databases', 'sql-databases', 'sql-databases', 'sql-databases', 'sql-databases']
-    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Recall@5=1  Precision@5=1.00  RR=1.00
+    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Hit: SÍ  Recall@5=1  Precision@5=1.00  RR=1.00
 
 Modo                       Precision@5    Recall@5     MRR
 ----------------------------------------------------------
@@ -41,5 +41,11 @@ Vectorial (Pinecone)              0.80        1.00    1.00
 Híbrido (Ensemble)                0.76        1.00    1.00
 ----------------------------------------------------------
 Precision@5 máxima alcanzable con este corpus: 0.84 (según cuántos chunks tiene cada documento esperado).
+
+MÉTRICAS GLOBALES DEL HÍBRIDO SOBRE 5 PREGUNTAS (namespace 'dev'):
+  • Recall@5 promedio:    1.00 (100%)
+  • Precision@5 promedio: 0.76 (76%)
+  • Hit Rate:             1.00 (5/5)
+  • MRR:                  1.00
 
 Resumen: el recuperador híbrido encontró el documento correcto en 5/5 preguntas (Recall@5=1.00); en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precision@5=0.76).

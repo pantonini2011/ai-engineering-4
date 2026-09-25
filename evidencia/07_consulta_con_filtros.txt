@@ -1,39 +1,62 @@
 $ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?"
-00:07:43 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-00:07:43 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-00:07:46 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:35:54 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:35:54 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:35:56 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
 Consulta: ¿Cómo agrego headers personalizados a la respuesta?
-Top-5 híbrido (BM25 + Pinecone):
-  1. handling-errors#002        [errores] 'El response resultante'  (de: bm25+vector)
-  2. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
-  3. cors#002                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25)
-  4. cors#003                   [seguridad] 'Usa `CORSMiddleware`'  (de: vector)
-  5. cors#004                   [seguridad] 'Requests de preflight CORS'  (de: bm25)
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Top-5:
+  1. handling-errors#002      score=0.0164  [errores]  data/docs/handling-errors.md · page 2  (de: bm25+vector)
+     'El response resultante': ### El response resultante Si el cliente solicita `http://example.com/items/foo` (un `item...
+  2. middleware#001           score=0.0154  [infraestructura]  data/docs/middleware.md · page 1  (de: bm25+vector)
+     'Middleware': # Middleware Puedes añadir middleware a las aplicaciones de **FastAPI**. Un "middleware" e...
+  3. cors#002                 score=0.0081  [seguridad]  data/docs/cors.md · page 2  (de: bm25)
+     'Usa `CORSMiddleware`': ## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMi...
+  4. cors#003                 score=0.0081  [seguridad]  data/docs/cors.md · page 3  (de: vector)
+     'Usa `CORSMiddleware`': Ninguno de `allow_origins`, `allow_methods` y `allow_headers` puede establecerse a `['*']`...
+  5. cors#004                 score=0.0079  [seguridad]  data/docs/cors.md · page 4  (de: bm25)
+     'Requests de preflight CORS': ### Requests de preflight CORS Estos son cualquier request `OPTIONS` con headers `Origin`...
 
 $ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?" --categoria seguridad
-00:07:52 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-00:07:52 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-00:07:54 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:36:02 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:36:02 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:36:04 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
 Consulta: ¿Cómo agrego headers personalizados a la respuesta?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
 Filtro de metadata: {"category": "seguridad"}
-Top-5 híbrido (BM25 + Pinecone):
-  1. cors#002                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
-  2. cors#004                   [seguridad] 'Requests de preflight CORS'  (de: bm25+vector)
-  3. cors#003                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
-  4. cors#001                   [seguridad] 'CORS (Cross-Origin Resource Sharing)'  (de: bm25+vector)
-  5. security#001               [seguridad] 'Seguridad'  (de: bm25)
+Top-5:
+  1. cors#002                 score=0.0161  [seguridad]  data/docs/cors.md · page 2  (de: bm25+vector)
+     'Usa `CORSMiddleware`': ## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMi...
+  2. cors#004                 score=0.0161  [seguridad]  data/docs/cors.md · page 4  (de: bm25+vector)
+     'Requests de preflight CORS': ### Requests de preflight CORS Estos son cualquier request `OPTIONS` con headers `Origin`...
+  3. cors#003                 score=0.0160  [seguridad]  data/docs/cors.md · page 3  (de: bm25+vector)
+     'Usa `CORSMiddleware`': Ninguno de `allow_origins`, `allow_methods` y `allow_headers` puede establecerse a `['*']`...
+  4. cors#001                 score=0.0157  [seguridad]  data/docs/cors.md · page 1  (de: bm25+vector)
+     'CORS (Cross-Origin Resource Sharing)': # CORS (Cross-Origin Resource Sharing) [CORS o "Cross-Origin Resource Sharing"](https://de...
+  5. security#001             score=0.0077  [seguridad]  data/docs/security.md · page 1  (de: bm25)
+     'Seguridad': # Seguridad Hay muchas formas de manejar la seguridad, autenticación y autorización. Y nor...
 
 $ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?" --filtro '{"doc_id": {"$in": ["handling-errors", "middleware"]}, "page": {"$lte": 2}}'
-00:08:00 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-00:08:00 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-00:08:02 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:36:10 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:36:10 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:36:12 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
 Consulta: ¿Cómo agrego headers personalizados a la respuesta?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
 Filtro de metadata: {"doc_id": {"$in": ["handling-errors", "middleware"]}, "page": {"$lte": 2}}
-Top-5 híbrido (BM25 + Pinecone):
-  1. handling-errors#002        [errores] 'El response resultante'  (de: bm25+vector)
-  2. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
-  3. middleware#002             [infraestructura] 'Antes y después de la `response`'  (de: bm25+vector)
-  4. handling-errors#001        [errores] 'Manejo de Errores'  (de: bm25+vector)
+Top-5:
+  1. handling-errors#002      score=0.0164  [errores]  data/docs/handling-errors.md · page 2  (de: bm25+vector)
+     'El response resultante': ### El response resultante Si el cliente solicita `http://example.com/items/foo` (un `item...
+  2. middleware#001           score=0.0160  [infraestructura]  data/docs/middleware.md · page 1  (de: bm25+vector)
+     'Middleware': # Middleware Puedes añadir middleware a las aplicaciones de **FastAPI**. Un "middleware" e...
+  3. middleware#002           score=0.0159  [infraestructura]  data/docs/middleware.md · page 2  (de: bm25+vector)
+     'Antes y después de la `response`': ### Antes y después de la `response` Puedes añadir código que se ejecute con la `request`,...
+  4. handling-errors#001      score=0.0157  [errores]  data/docs/handling-errors.md · page 1  (de: bm25+vector)
+     'Manejo de Errores': # Manejo de Errores Existen muchas situaciones en las que necesitas notificar un error a u...

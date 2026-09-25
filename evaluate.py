@@ -12,6 +12,8 @@ y un chunk recuperado se considera relevante si su metadata.doc_id coincide.
 - Precision@k fracción de los k recuperados que son del documento correcto
 - MRR         1 / posición del primer chunk relevante (extra: premia que el
               documento correcto aparezca arriba, no solo que aparezca)
+- Hit Rate    fracción de preguntas con al menos un acierto en el top-k. Con un
+              solo documento relevante por pregunta coincide con Recall@k.
 
 Se evalúan los tres modos (BM25 solo, vectorial solo, híbrido) sobre la misma
 instancia de RAGSystem para mostrar qué aporta la combinación.
@@ -81,7 +83,7 @@ def print_detail(results: list[QueryResult], k: int) -> None:
         print(f"    esperado: {r.esperado}")
         print(f"    top-{k}:   {r.recuperados[:k]}")
         print(
-            f"    relevantes: {marcas}  ->  Recall@{k}={r.recall(k):.0f}  "
+            f"    relevantes: {marcas}  ->  Hit: {'SÍ' if r.recall(k) else 'NO'}  Recall@{k}={r.recall(k):.0f}  "
             f"Precision@{k}={r.precision(k):.2f}  RR={r.reciprocal_rank(k):.2f}"
         )
 
@@ -134,9 +136,16 @@ def main() -> None:
         f"(según cuántos chunks tiene cada documento esperado)."
     )
     h = resumen["Híbrido (Ensemble)"]
+    n = len(golden)
+    hits = sum(r.recall(k) for r in detalle)
+    print(f"\nMÉTRICAS GLOBALES DEL HÍBRIDO SOBRE {n} PREGUNTAS (namespace '{rag.namespace}'):")
+    print(f"  • Recall@{k} promedio:    {h['recall']:.2f} ({h['recall']:.0%})")
+    print(f"  • Precision@{k} promedio: {h['precision']:.2f} ({h['precision']:.0%})")
+    print(f"  • Hit Rate:             {hits / n:.2f} ({hits:.0f}/{n})")
+    print(f"  • MRR:                  {h['mrr']:.2f}")
     print(
         f"\nResumen: el recuperador híbrido encontró el documento correcto en "
-        f"{h['recall'] * len(golden):.0f}/{len(golden)} preguntas (Recall@{k}={h['recall']:.2f}); "
+        f"{h['recall'] * n:.0f}/{n} preguntas (Recall@{k}={h['recall']:.2f}); "
         f"en promedio {h['precision'] * k:.1f} de cada {k} chunks recuperados son del documento "
         f"correcto (Precision@{k}={h['precision']:.2f})."
     )

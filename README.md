@@ -46,7 +46,7 @@ ai-engineering-4/
 ├── data/
 │   ├── docs/                # 12 páginas del tutorial de FastAPI en español (licencia MIT)
 │   └── golden_set.json      # 5 pares {"pregunta", "documento_id_esperado"}
-├── tests/                   # 41 tests con fakes (no llaman a ninguna API)
+├── tests/                   # 44 tests con fakes (no llaman a ninguna API)
 │   ├── test_setup_index.py
 │   ├── test_ingestion.py
 │   ├── test_rag_system.py
@@ -297,6 +297,7 @@ python -m src.ingestion --reset    # vacía el namespace y re-indexa todo
 
 # Recuperación: top-5 híbrido para una consulta
 python -m src.rag_system "¿Cómo agrego CORSMiddleware con allow_origins?"
+python -m src.rag_system "¿Cómo agrego CORSMiddleware con allow_origins?" --json   # misma consulta, salida en JSON
 
 # Recuperación con filtro de metadata (por categoría, o cualquier filtro de Pinecone en JSON)
 python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?" --categoria seguridad
@@ -313,8 +314,31 @@ Qué hace cada comando sobre Pinecone:
 |---|---|---|
 | `src.setup_index` | `list_indexes()` y, si falta, `create_index(dimension=1536, metric="cosine", spec=ServerlessSpec("aws", "us-east-1"))`. Espera a que esté listo y valida dimensión y métrica. | `Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine` |
 | `src.ingestion` | `ensure_index()` (mismo chequeo) + `upsert` por lotes de 100 en el namespace, con reintentos | `12 documentos -> 65 chunks` · `Ingesta completa: 65 vectores subidos; namespace 'dev' ... tiene 65.` |
-| `src.rag_system` | `list` + `fetch` del namespace (corpus de BM25) y `query` vectorial (con `filter` si se pasa `--categoria` o `--filtro`) | Top-5 con la categoría y la sección de cada chunk, y qué recuperador lo trajo (`bm25`, `vector` o ambos) |
-| `evaluate.py` | Igual que `src.rag_system`, para las 5 preguntas y los 3 modos | Detalle por pregunta, tabla de métricas y resumen |
+| `src.rag_system` | `list` + `fetch` del namespace (corpus de BM25) y `query` vectorial (con `filter` si se pasa `--categoria` o `--filtro`) | Índice, namespace y estrategia; top-5 con `chunk_id`, score combinado (RRF), categoría, fuente, `page`, sección, un extracto y qué recuperador lo trajo (`bm25`, `vector` o ambos). Con `--json`, lo mismo como JSON |
+| `evaluate.py` | Igual que `src.rag_system`, para las 5 preguntas y los 3 modos | Detalle por pregunta (con Hit SÍ/NO), tabla de métricas por modo y métricas globales (Recall@5, Precision@5, Hit Rate, MRR) |
+
+Salida de la consulta ([`evidencia/03_consulta_hibrida.txt`](evidencia/03_consulta_hibrida.txt);
+la versión `--json` está en [`evidencia/08_consulta_json.txt`](evidencia/08_consulta_json.txt)):
+
+```
+Consulta: ¿Cómo agrego CORSMiddleware con allow_origins?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Top-5:
+  1. cors#002                 score=0.0164  [seguridad]  data/docs/cors.md · page 2  (de: bm25+vector)
+     'Usa `CORSMiddleware`': ## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMi...
+  2. cors#003                 score=0.0160  [seguridad]  data/docs/cors.md · page 3  (de: bm25+vector)
+     'Usa `CORSMiddleware`': Ninguno de `allow_origins`, `allow_methods` y `allow_headers` puede establecerse a `['*']`...
+  3. cors#004                 score=0.0156  [seguridad]  data/docs/cors.md · page 4  (de: bm25+vector)
+     'Requests de preflight CORS': ### Requests de preflight CORS Estos son cualquier request `OPTIONS` con headers `Origin`...
+  4. middleware#001           score=0.0154  [infraestructura]  data/docs/middleware.md · page 1  (de: bm25+vector)
+     'Middleware': # Middleware Puedes añadir middleware a las aplicaciones de **FastAPI**. Un "middleware" e...
+  5. cors#001                 score=0.0081  [seguridad]  data/docs/cors.md · page 1  (de: vector)
+     'CORS (Cross-Origin Resource Sharing)': # CORS (Cross-Origin Resource Sharing) [CORS o "Cross-Origin Resource Sharing"](https://de...
+```
+
+El `score` es el score RRF combinado (ver [sección 3.3](#33-estrategia-de-recuperación-híbrida-ensembleretriever)). Con pesos 0.5 el máximo es
+0.5/61 + 0.5/61 ≈ 0.0164, que corresponde a un chunk que sale primero en los dos rankings. Un
+chunk que trae un solo recuperador no pasa de 0.5/61 ≈ 0.0082.
 
 La salida real de cada comando está en [`evidencia/`](evidencia/).
 
@@ -352,6 +376,12 @@ Híbrido (Ensemble)                0.76        1.00    1.00
 ----------------------------------------------------------
 Precision@5 máxima alcanzable con este corpus: 0.84 (según cuántos chunks tiene cada documento esperado).
 
+MÉTRICAS GLOBALES DEL HÍBRIDO SOBRE 5 PREGUNTAS (namespace 'dev'):
+  • Recall@5 promedio:    1.00 (100%)
+  • Precision@5 promedio: 0.76 (76%)
+  • Hit Rate:             1.00 (5/5)
+  • MRR:                  1.00
+
 Resumen: el recuperador híbrido encontró el documento correcto en 5/5 preguntas (Recall@5=1.00);
 en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precision@5=0.76).
 ```
@@ -385,7 +415,7 @@ en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precisi
 pytest -v
 ```
 
-Los 41 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
+Los 44 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
 red ni API keys: reemplazan Pinecone por objetos fake, así que se pueden correr sin `.env`.
 
 | Archivo | Qué verifica |
@@ -401,7 +431,8 @@ Verificaciones contra Pinecone real, en [`evidencia/`](evidencia/README.md):
 |---|---|
 | [`01_ingesta.txt`](evidencia/01_ingesta.txt) | Validación del índice (1536 dims, coseno), 65 chunks subidos |
 | [`02_ingesta_idempotente.txt`](evidencia/02_ingesta_idempotente.txt) | La segunda corrida no re-indexa |
-| [`03_consulta_hibrida.txt`](evidencia/03_consulta_hibrida.txt) | Top-5 híbrido con el origen de cada resultado |
+| [`03_consulta_hibrida.txt`](evidencia/03_consulta_hibrida.txt) | Top-5 híbrido con namespace, score combinado, fuente, `page`, categoría y el origen de cada resultado |
+| [`08_consulta_json.txt`](evidencia/08_consulta_json.txt) | La misma consulta con `--json` |
 | [`07_consulta_con_filtros.txt`](evidencia/07_consulta_con_filtros.txt) | La misma consulta sin filtro, con `--categoria` y con un filtro `$in` + `$lte` |
 | [`04_evaluacion.txt`](evidencia/04_evaluacion.txt) | Métricas completas |
 | [`06_esquema_vector.txt`](evidencia/06_esquema_vector.txt) | Vector real guardado (metadata con texto) y conteo por namespace |

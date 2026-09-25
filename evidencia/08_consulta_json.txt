@@ -1,0 +1,93 @@
+$ python -m src.rag_system "¿Cómo agrego CORSMiddleware con allow_origins?" --json
+D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:35:22 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:35:22 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:35:25 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+{
+  "pregunta": "¿Cómo agrego CORSMiddleware con allow_origins?",
+  "estrategia_recuperacion": "hibrida_ensemble (bm25 + pinecone_dense, RRF)",
+  "pesos": {
+    "bm25": 0.5,
+    "vector": 0.5
+  },
+  "indice": "fastapi-docs-rag",
+  "namespace": "dev",
+  "filtro": null,
+  "top_k": 5,
+  "fragmentos_recuperados": [
+    {
+      "chunk_id": "cors#002",
+      "doc_id": "cors",
+      "fuente": "data/docs/cors.md",
+      "categoria": "seguridad",
+      "seccion": "Usa `CORSMiddleware`",
+      "page": 2,
+      "score_combinado": 0.0164,
+      "recuperado_por": [
+        "bm25",
+        "vector"
+      ],
+      "extracto": "## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMiddleware`. * Importa `CORSMiddleware`. * Crea una lista de orígenes permitidos (como strings). * Agrégalo como..."
+    },
+    {
+      "chunk_id": "cors#003",
+      "doc_id": "cors",
+      "fuente": "data/docs/cors.md",
+      "categoria": "seguridad",
+      "seccion": "Usa `CORSMiddleware`",
+      "page": 3,
+      "score_combinado": 0.016,
+      "recuperado_por": [
+        "bm25",
+        "vector"
+      ],
+      "extracto": "Ninguno de `allow_origins`, `allow_methods` y `allow_headers` puede establecerse a `['*']` si `allow_credentials` está configurado a `True`. Todos deben ser [especificados explícitamente](https://deve..."
+    },
+    {
+      "chunk_id": "cors#004",
+      "doc_id": "cors",
+      "fuente": "data/docs/cors.md",
+      "categoria": "seguridad",
+      "seccion": "Requests de preflight CORS",
+      "page": 4,
+      "score_combinado": 0.0156,
+      "recuperado_por": [
+        "bm25",
+        "vector"
+      ],
+      "extracto": "### Requests de preflight CORS Estos son cualquier request `OPTIONS` con headers `Origin` y `Access-Control-Request-Method`. En este caso, el middleware interceptará el request entrante y responderá c..."
+    },
+    {
+      "chunk_id": "middleware#001",
+      "doc_id": "middleware",
+      "fuente": "data/docs/middleware.md",
+      "categoria": "infraestructura",
+      "seccion": "Middleware",
+      "page": 1,
+      "score_combinado": 0.0154,
+      "recuperado_por": [
+        "bm25",
+        "vector"
+      ],
+      "extracto": "# Middleware Puedes añadir middleware a las aplicaciones de **FastAPI**. Un \"middleware\" es una función que trabaja con cada **request** antes de que sea procesada por cualquier *path operation* espec..."
+    },
+    {
+      "chunk_id": "cors#001",
+      "doc_id": "cors",
+      "fuente": "data/docs/cors.md",
+      "categoria": "seguridad",
+      "seccion": "CORS (Cross-Origin Resource Sharing)",
+      "page": 1,
+      "score_combinado": 0.0081,
+      "recuperado_por": [
+        "vector"
+      ],
+      "extracto": "# CORS (Cross-Origin Resource Sharing) [CORS o \"Cross-Origin Resource Sharing\"](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) se refiere a situaciones en las que un frontend que se ejecuta e..."
+    }
+  ],
+  "fuentes": [
+    "data/docs/cors.md",
+    "data/docs/middleware.md"
+  ]
+}

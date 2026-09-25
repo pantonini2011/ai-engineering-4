@@ -2,6 +2,7 @@
 
 Uso:  python -m src.rag_system "¿Cómo habilito CORS para mi frontend?"
       python -m src.rag_system "¿Cómo manejo errores?" --categoria errores
+      python -m src.rag_system "¿Cómo habilito CORS?" --json    (salida en JSON)
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ import json
 import logging
 import re
 import unicodedata
+from collections import defaultdict
 
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
@@ -200,12 +202,69 @@ class RAGSystem:
         # Pinecone aplica el filtro del lado del servidor, dentro del namespace.
         return self.vectorstore.similarity_search(query, k=self.k, filter=filtro)
 
+    def retrieve_con_scores(
+        self, query: str, filtro: dict | None = None
+    ) -> list[tuple[Document, float, list[str]]]:
+        """Top-k híbrido con el score combinado de cada chunk y qué recuperador lo trajo.
+
+        Devuelve el mismo ranking que `retrieve` (misma fusión RRF sobre los
+        mismos dos rankings), pero con el score que el EnsembleRetriever calcula
+        internamente y no expone: sum(peso / (posición + c)) sobre cada ranking
+        en el que aparece el chunk.
+        """
+        rankings = {"bm25": self.retrieve_bm25(query, filtro), "vector": self.retrieve_vector(query, filtro)}
+        scores: dict[str, float] = defaultdict(float)
+        origen: dict[str, list[str]] = defaultdict(list)
+        for (nombre, docs), peso in zip(rankings.items(), self.ensemble.weights):
+            for rank, doc in enumerate(docs, start=1):
+                cid = doc.metadata["chunk_id"]
+                scores[cid] += peso / (rank + self.ensemble.c)
+                origen[cid].append(nombre)
+        fusion = self.ensemble.weighted_reciprocal_rank(list(rankings.values()))[: self.k]
+        return [(d, scores[d.metadata["chunk_id"]], origen[d.metadata["chunk_id"]]) for d in fusion]
+
+
+def _extracto(text: str, n: int) -> str:
+    text = " ".join(text.split())
+    return text if len(text) <= n else text[:n].rstrip() + "..."
+
+
+def resultado_json(rag: RAGSystem, query: str, filtro: dict | None, resultados) -> dict:
+    """Salida estructurada de una consulta: metadata de cada chunk + score combinado."""
+    fragmentos = [
+        {
+            "chunk_id": d.metadata["chunk_id"],
+            "doc_id": d.metadata.get("doc_id"),
+            "fuente": d.metadata.get("source"),
+            "categoria": d.metadata.get("category"),
+            "seccion": d.metadata.get("section"),
+            # Pinecone devuelve los números de la metadata como float (2.0).
+            "page": int(d.metadata["page"]) if d.metadata.get("page") is not None else None,
+            "score_combinado": round(score, 4),
+            "recuperado_por": origen,
+            "extracto": _extracto(d.page_content, 200),
+        }
+        for d, score, origen in resultados
+    ]
+    return {
+        "pregunta": query,
+        "estrategia_recuperacion": "hibrida_ensemble (bm25 + pinecone_dense, RRF)",
+        "pesos": {"bm25": rag.ensemble.weights[0], "vector": rag.ensemble.weights[1]},
+        "indice": config.INDEX_NAME,
+        "namespace": rag.namespace,
+        "filtro": filtro,
+        "top_k": rag.k,
+        "fragmentos_recuperados": fragmentos,
+        "fuentes": list(dict.fromkeys(f["fuente"] for f in fragmentos)),
+    }
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Consulta el recuperador híbrido.")
     parser.add_argument("query")
     parser.add_argument("--categoria", help='atajo para --filtro \'{"category": "<categoria>"}\'')
     parser.add_argument("--filtro", help='filtro de metadata en JSON (sintaxis de Pinecone)')
+    parser.add_argument("--json", action="store_true", help="imprime el resultado como JSON")
     args = parser.parse_args()
     config.setup_logging()
 
@@ -214,20 +273,25 @@ def main() -> None:
         filtro = {**(filtro or {}), "category": args.categoria}
 
     rag = RAGSystem()
-    bm25_ids = {d.metadata["chunk_id"] for d in rag.retrieve_bm25(args.query, filtro)}
-    vec_ids = {d.metadata["chunk_id"] for d in rag.retrieve_vector(args.query, filtro)}
+    salida = resultado_json(rag, args.query, filtro, rag.retrieve_con_scores(args.query, filtro))
+    if args.json:
+        print(json.dumps(salida, ensure_ascii=False, indent=2))
+        return
 
     print(f"\nConsulta: {args.query}")
+    print(
+        f"Índice: {salida['indice']} · namespace: {salida['namespace']} · "
+        f"estrategia: híbrida (BM25 + Pinecone, RRF, pesos {rag.ensemble.weights})"
+    )
     if filtro:
         print(f"Filtro de metadata: {json.dumps(filtro, ensure_ascii=False)}")
-    print(f"Top-{rag.k} híbrido (BM25 + Pinecone):")
-    for rank, doc in enumerate(rag.retrieve(args.query, filtro), start=1):
-        cid = doc.metadata["chunk_id"]
-        origen = "+".join(n for n, s in (("bm25", bm25_ids), ("vector", vec_ids)) if cid in s)
+    print(f"Top-{rag.k}:")
+    for rank, f in enumerate(salida["fragmentos_recuperados"], start=1):
         print(
-            f"  {rank}. {cid:<26} [{doc.metadata['category']}] "
-            f"{doc.metadata['section'][:45]!r}  (de: {origen})"
+            f"  {rank}. {f['chunk_id']:<24} score={f['score_combinado']:.4f}  [{f['categoria']}]  "
+            f"{f['fuente']} · page {f['page']}  (de: {'+'.join(f['recuperado_por'])})"
         )
+        print(f"     {f['seccion'][:45]!r}: {_extracto(f['extracto'], 90)}")
 
 
 if __name__ == "__main__":

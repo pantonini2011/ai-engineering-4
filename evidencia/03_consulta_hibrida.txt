@@ -1,11 +1,19 @@
-23:46:45 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-23:46:45 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-23:46:47 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:35:13 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:35:13 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:35:16 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
 Consulta: ¿Cómo agrego CORSMiddleware con allow_origins?
-Top-5 híbrido (BM25 + Pinecone):
-  1. cors#002                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
-  2. cors#003                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
-  3. cors#004                   [seguridad] 'Requests de preflight CORS'  (de: bm25+vector)
-  4. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
-  5. cors#001                   [seguridad] 'CORS (Cross-Origin Resource Sharing)'  (de: vector)
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Top-5:
+  1. cors#002                 score=0.0164  [seguridad]  data/docs/cors.md · page 2  (de: bm25+vector)
+     'Usa `CORSMiddleware`': ## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMi...
+  2. cors#003                 score=0.0160  [seguridad]  data/docs/cors.md · page 3  (de: bm25+vector)
+     'Usa `CORSMiddleware`': Ninguno de `allow_origins`, `allow_methods` y `allow_headers` puede establecerse a `['*']`...
+  3. cors#004                 score=0.0156  [seguridad]  data/docs/cors.md · page 4  (de: bm25+vector)
+     'Requests de preflight CORS': ### Requests de preflight CORS Estos son cualquier request `OPTIONS` con headers `Origin`...
+  4. middleware#001           score=0.0154  [infraestructura]  data/docs/middleware.md · page 1  (de: bm25+vector)
+     'Middleware': # Middleware Puedes añadir middleware a las aplicaciones de **FastAPI**. Un "middleware" e...
+  5. cors#001                 score=0.0081  [seguridad]  data/docs/cors.md · page 1  (de: vector)
+     'CORS (Cross-Origin Resource Sharing)': # CORS (Cross-Origin Resource Sharing) [CORS o "Cross-Origin Resource Sharing"](https://de...

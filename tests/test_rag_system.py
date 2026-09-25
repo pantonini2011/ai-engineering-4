@@ -5,7 +5,9 @@ from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableLambda
 
-from src.rag_system import RAGSystem, bm25_tokenize, cumple_filtro, load_corpus_from_pinecone
+from src.rag_system import (
+    RAGSystem, bm25_tokenize, cumple_filtro, load_corpus_from_pinecone, resultado_json,
+)
 
 
 def test_tokenizer_conserva_identificadores_y_quita_stopwords():
@@ -148,3 +150,44 @@ def test_bm25_filtra_antes_de_cortar_el_top_k():
 
 def test_filtro_sin_coincidencias_devuelve_lista_vacia():
     assert _rag().retrieve("headers", filtro={"category": "inexistente"}) == []
+
+
+# --- Score combinado y salida JSON ------------------------------------------
+
+def test_retrieve_con_scores_mismo_orden_que_retrieve_y_score_rrf():
+    rag = _rag()
+    resultados = rag.retrieve_con_scores("headers")
+    assert [d.metadata["chunk_id"] for d, _, _ in resultados] == [
+        d.metadata["chunk_id"] for d in rag.retrieve("headers")
+    ]
+    scores = [s for _, s, _ in resultados]
+    assert scores == sorted(scores, reverse=True)
+    # Un chunk que traen los dos recuperadores suma peso / (posición + c) de cada ranking.
+    bm25 = [d.metadata["chunk_id"] for d in rag.retrieve_bm25("headers")]
+    vec = [d.metadata["chunk_id"] for d in rag.retrieve_vector("headers")]
+    doc, score, origen = next(r for r in resultados if r[2] == ["bm25", "vector"])
+    cid = doc.metadata["chunk_id"]
+    w_bm25, w_vec = rag.ensemble.weights
+    c = rag.ensemble.c
+    assert score == pytest.approx(w_bm25 / (bm25.index(cid) + 1 + c) + w_vec / (vec.index(cid) + 1 + c))
+
+
+def test_retrieve_con_scores_respeta_el_filtro():
+    resultados = _rag().retrieve_con_scores("headers", filtro={"category": "seguridad"})
+    assert {d.metadata["category"] for d, _, _ in resultados} == {"seguridad"}
+
+
+def test_resultado_json_incluye_metadata_score_y_namespace():
+    rag = _rag()
+    doc = Document(
+        page_content="## Usa CORSMiddleware\n\n" + "x " * 200,
+        metadata={"chunk_id": "cors#002", "doc_id": "cors", "source": "data/docs/cors.md",
+                  "category": "seguridad", "section": "Usa CORSMiddleware", "page": 2.0},
+    )
+    salida = resultado_json(rag, "¿CORS?", None, [(doc, 0.016393, ["bm25", "vector"])])
+    assert salida["namespace"] == rag.namespace and salida["top_k"] == rag.k
+    (f,) = salida["fragmentos_recuperados"]
+    assert f["fuente"] == "data/docs/cors.md" and f["page"] == 2 and f["categoria"] == "seguridad"
+    assert f["score_combinado"] == 0.0164 and f["recuperado_por"] == ["bm25", "vector"]
+    assert f["extracto"].startswith("## Usa CORSMiddleware x") and len(f["extracto"]) <= 203
+    assert salida["fuentes"] == ["data/docs/cors.md"]
