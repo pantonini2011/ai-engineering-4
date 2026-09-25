@@ -1,6 +1,6 @@
-17:36:18 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-17:36:18 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-17:36:20 INFO src.rag_system: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+17:49:00 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:49:00 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:49:03 INFO src.rag_system: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
 ==============================================================================
 EVALUACIÓN DEL RECUPERADOR — índice 'fastapi-docs-rag', namespace 'dev'

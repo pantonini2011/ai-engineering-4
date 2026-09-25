@@ -1,9 +1,9 @@
 $ python -m src.rag_system "¿Cómo agrego CORSMiddleware con allow_origins?" --json
-D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+D:\ai-engineering-4\src\rag_system.py:19: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
   from langchain_community.retrievers import BM25Retriever
-17:35:22 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-17:35:22 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-17:35:25 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+17:47:57 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:47:57 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:48:00 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 {
   "pregunta": "¿Cómo agrego CORSMiddleware con allow_origins?",
   "estrategia_recuperacion": "hibrida_ensemble (bm25 + pinecone_dense, RRF)",
@@ -15,6 +15,8 @@ D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-communi
   "namespace": "dev",
   "filtro": null,
   "top_k": 5,
+  "similitud_maxima": 0.749,
+  "umbral_similitud": 0.38,
   "fragmentos_recuperados": [
     {
       "chunk_id": "cors#002",
@@ -24,6 +26,7 @@ D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-communi
       "seccion": "Usa `CORSMiddleware`",
       "page": 2,
       "score_combinado": 0.0164,
+      "similitud_coseno": 0.749,
       "recuperado_por": [
         "bm25",
         "vector"
@@ -38,6 +41,7 @@ D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-communi
       "seccion": "Usa `CORSMiddleware`",
       "page": 3,
       "score_combinado": 0.016,
+      "similitud_coseno": 0.55,
       "recuperado_por": [
         "bm25",
         "vector"
@@ -52,6 +56,7 @@ D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-communi
       "seccion": "Requests de preflight CORS",
       "page": 4,
       "score_combinado": 0.0156,
+      "similitud_coseno": 0.52,
       "recuperado_por": [
         "bm25",
         "vector"
@@ -66,6 +71,7 @@ D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-communi
       "seccion": "Middleware",
       "page": 1,
       "score_combinado": 0.0154,
+      "similitud_coseno": 0.473,
       "recuperado_por": [
         "bm25",
         "vector"
@@ -80,6 +86,7 @@ D:\ai-engineering-4\src\rag_system.py:18: DeprecationWarning: `langchain-communi
       "seccion": "CORS (Cross-Origin Resource Sharing)",
       "page": 1,
       "score_combinado": 0.0081,
+      "similitud_coseno": 0.586,
       "recuperado_por": [
         "vector"
       ],

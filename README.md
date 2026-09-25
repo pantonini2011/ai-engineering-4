@@ -46,7 +46,7 @@ ai-engineering-4/
 ├── data/
 │   ├── docs/                # 12 páginas del tutorial de FastAPI en español (licencia MIT)
 │   └── golden_set.json      # 5 pares {"pregunta", "documento_id_esperado"}
-├── tests/                   # 44 tests con fakes (no llaman a ninguna API)
+├── tests/                   # 47 tests con fakes (no llaman a ninguna API)
 │   ├── test_setup_index.py
 │   ├── test_ingestion.py
 │   ├── test_rag_system.py
@@ -133,6 +133,21 @@ EnsembleRetriever(
   tildes ("configuración" = "configuracion"), conserva `_` (`add_middleware` queda como un
   solo término) y filtra stopwords en español (sin eso, BM25 trae chunks de otros temas solo
   por coincidir en "cómo", "de" o "que").
+- **Umbral de relevancia para preguntas fuera de tema.** Un recuperador top-k siempre devuelve
+  k chunks, aunque la pregunta no tenga nada que ver con el corpus: "¿Cuándo me puedo tomar
+  vacaciones?" traía 5 chunks de FastAPI. Para evitarlo hay dos controles:
+  - Si la similitud coseno del mejor chunk vectorial queda por debajo de `MIN_SIMILITUD`
+    (0.38 por default), el sistema devuelve "sin resultados relevantes" en vez de un top-5.
+    El valor sale de medir las dos poblaciones en este corpus: las preguntas del golden set
+    dan entre 0.45 y 0.63 y las preguntas fuera de tema entre 0.12 y 0.31 (vacaciones 0.21,
+    Nginx 0.31). Con tan pocas preguntas es un valor orientativo: se puede ajustar en `.env`
+    sin tocar código.
+  - BM25 descarta los chunks con score 0, es decir, sin ningún término en común con la
+    consulta. El `BM25Retriever` de LangChain los devolvía igual para completar el top-k,
+    como relleno.
+
+  La evidencia está en
+  [`evidencia/09_pregunta_fuera_de_dominio.txt`](evidencia/09_pregunta_fuera_de_dominio.txt).
 
 ### 3.4 Estrategia de segmentación: namespaces y metadata
 
@@ -282,6 +297,7 @@ Completar en `.env`:
 | `INDEX_NAME` | Sí | Nombre del índice, ej. `fastapi-docs-rag` |
 | `PINECONE_NAMESPACE` | No (default `dev`) | Entorno: `dev` / `prod` |
 | `PINECONE_CLOUD`, `PINECONE_REGION` | No (default `aws`, `us-east-1`) | Ubicación del índice Serverless |
+| `MIN_SIMILITUD` | No (default `0.38`) | Similitud coseno mínima para considerar que la pregunta es del dominio ([sección 3.3](#33-estrategia-de-recuperación-híbrida-ensembleretriever)) |
 
 Si falta una variable obligatoria, los scripts cortan con un mensaje que dice cuál falta.
 
@@ -323,7 +339,7 @@ la versión `--json` está en [`evidencia/08_consulta_json.txt`](evidencia/08_co
 ```
 Consulta: ¿Cómo agrego CORSMiddleware con allow_origins?
 Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
-Top-5:
+Top-5 (similitud coseno máxima 0.749, umbral 0.38):
   1. cors#002                 score=0.0164  [seguridad]  data/docs/cors.md · page 2  (de: bm25+vector)
      'Usa `CORSMiddleware`': ## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMi...
   2. cors#003                 score=0.0160  [seguridad]  data/docs/cors.md · page 3  (de: bm25+vector)
@@ -415,7 +431,7 @@ en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precisi
 pytest -v
 ```
 
-Los 44 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
+Los 47 tests pasan ([`evidencia/05_tests_pytest.txt`](evidencia/05_tests_pytest.txt)). No usan
 red ni API keys: reemplazan Pinecone por objetos fake, así que se pueden correr sin `.env`.
 
 | Archivo | Qué verifica |
@@ -433,6 +449,7 @@ Verificaciones contra Pinecone real, en [`evidencia/`](evidencia/README.md):
 | [`02_ingesta_idempotente.txt`](evidencia/02_ingesta_idempotente.txt) | La segunda corrida no re-indexa |
 | [`03_consulta_hibrida.txt`](evidencia/03_consulta_hibrida.txt) | Top-5 híbrido con namespace, score combinado, fuente, `page`, categoría y el origen de cada resultado |
 | [`08_consulta_json.txt`](evidencia/08_consulta_json.txt) | La misma consulta con `--json` |
+| [`09_pregunta_fuera_de_dominio.txt`](evidencia/09_pregunta_fuera_de_dominio.txt) | Preguntas fuera de tema (vacaciones, capital de Francia, Nginx): "sin resultados relevantes" en vez de un top-5 |
 | [`07_consulta_con_filtros.txt`](evidencia/07_consulta_con_filtros.txt) | La misma consulta sin filtro, con `--categoria` y con un filtro `$in` + `$lte` |
 | [`04_evaluacion.txt`](evidencia/04_evaluacion.txt) | Métricas completas |
 | [`06_esquema_vector.txt`](evidencia/06_esquema_vector.txt) | Vector real guardado (metadata con texto) y conteo por namespace |

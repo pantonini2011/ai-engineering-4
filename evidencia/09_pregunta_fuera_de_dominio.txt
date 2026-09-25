@@ -1,0 +1,56 @@
+$ python -m src.rag_system "¿Cuando me puedo tomar vacaciones?"
+D:\ai-engineering-4\src\rag_system.py:19: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:48:29 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:48:29 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:48:31 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+
+Consulta: ¿Cuando me puedo tomar vacaciones?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Sin resultados relevantes: la similitud máxima (0.210) está por debajo del umbral (0.38). La pregunta parece estar fuera de la documentación indexada.
+
+$ python -m src.rag_system "¿Cuál es la capital de Francia?"
+D:\ai-engineering-4\src\rag_system.py:19: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:48:37 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:48:37 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:48:39 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+
+Consulta: ¿Cuál es la capital de Francia?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Sin resultados relevantes: la similitud máxima (0.116) está por debajo del umbral (0.38). La pregunta parece estar fuera de la documentación indexada.
+
+$ python -m src.rag_system "¿Cómo configuro un proxy en Nginx?"
+D:\ai-engineering-4\src\rag_system.py:19: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:48:45 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:48:45 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:48:47 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+
+Consulta: ¿Cómo configuro un proxy en Nginx?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Sin resultados relevantes: la similitud máxima (0.314) está por debajo del umbral (0.38). La pregunta parece estar fuera de la documentación indexada.
+
+$ python -m src.rag_system "¿Cuando me puedo tomar vacaciones?" --json
+D:\ai-engineering-4\src\rag_system.py:19: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+  from langchain_community.retrievers import BM25Retriever
+17:48:52 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+17:48:53 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+17:48:55 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
+{
+  "pregunta": "¿Cuando me puedo tomar vacaciones?",
+  "estrategia_recuperacion": "hibrida_ensemble (bm25 + pinecone_dense, RRF)",
+  "pesos": {
+    "bm25": 0.5,
+    "vector": 0.5
+  },
+  "indice": "fastapi-docs-rag",
+  "namespace": "dev",
+  "filtro": null,
+  "top_k": 5,
+  "similitud_maxima": 0.21,
+  "umbral_similitud": 0.38,
+  "fragmentos_recuperados": [],
+  "fuentes": [],
+  "mensaje": "Sin resultados relevantes: la similitud máxima (0.210) está por debajo del umbral (0.38). La pregunta parece estar fuera de la documentación indexada."
+}

@@ -13,6 +13,7 @@ import logging
 import re
 import unicodedata
 from collections import defaultdict
+from dataclasses import dataclass
 
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
@@ -124,6 +125,16 @@ def cumple_filtro(metadata: dict, filtro: dict | None) -> bool:
     return True
 
 
+@dataclass
+class Fragmento:
+    """Un chunk del top-k híbrido con los scores que explican su posición."""
+
+    doc: Document
+    score: float  # score RRF combinado: sum(peso / (posición + c))
+    origen: list[str]  # recuperadores que lo trajeron: "bm25", "vector" o ambos
+    similitud: float | None  # coseno contra la consulta (None si solo lo trajo BM25)
+
+
 class RAGSystem:
     """Encapsula un EnsembleRetriever (BM25 + Pinecone) que devuelve el top-k."""
 
@@ -136,9 +147,11 @@ class RAGSystem:
         embeddings=None,
         corpus: list[Document] | None = None,
         vectorstore=None,
+        min_similitud: float = config.MIN_SIMILITUD,
     ):
         self.k = k
         self.namespace = namespace
+        self.min_similitud = min_similitud
         if corpus is None or vectorstore is None:
             index = index or ensure_index()
 
@@ -160,7 +173,9 @@ class RAGSystem:
         self.vector_retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
         # Fusiona ambos rankings con Reciprocal Rank Fusion. id_key hace que un
         # mismo chunk traído por los dos recuperadores cuente una sola vez
-        # (y sume score), en vez de compararlos por texto.
+        # (y sume score), en vez de compararlos por texto. La fusión se hace con
+        # su weighted_reciprocal_rank sobre rankings ya filtrados (por metadata
+        # y descartando lo irrelevante), con los mismos pesos, c e id_key.
         self.ensemble = EnsembleRetriever(
             retrievers=[self.bm25_retriever, self.vector_retriever],
             weights=weights or config.ENSEMBLE_WEIGHTS,
@@ -174,45 +189,56 @@ class RAGSystem:
         `{"doc_id": {"$in": ["cors", "middleware"]}}`. Se aplica a los dos
         recuperadores *antes* de rankear: así el top-k sale completo del
         subconjunto filtrado, en vez de filtrar un top-k ya recortado.
+
+        Devuelve una lista vacía si la pregunta no es del dominio (ver
+        `retrieve_con_scores`).
         """
-        if not filtro:
-            return self.ensemble.invoke(query)[: self.k]
-        # Mismos pesos, id_key y RRF que el EnsembleRetriever, sobre los
-        # rankings ya filtrados.
-        rankings = [self.retrieve_bm25(query, filtro), self.retrieve_vector(query, filtro)]
-        return self.ensemble.weighted_reciprocal_rank(rankings)[: self.k]
+        fragmentos, _ = self.retrieve_con_scores(query, filtro)
+        return [f.doc for f in fragmentos]
 
     def retrieve_bm25(self, query: str, filtro: dict | None = None) -> list[Document]:
-        if not filtro:
-            return self.bm25_retriever.invoke(query)[: self.k]
         # BM25 corre en memoria: se puntúa todo el corpus y se descartan los
-        # chunks que no cumplen el filtro antes de cortar el top-k.
+        # chunks que no cumplen el filtro antes de cortar el top-k. También los
+        # de score 0 (ningún término en común con la consulta): el retriever de
+        # LangChain los devuelve igual para completar el top-k, y en una
+        # pregunta fuera de tema eso es puro relleno.
         scores = self.bm25_retriever.vectorizer.get_scores(bm25_tokenize(query))
         candidatos = [
             (score, doc)
             for score, doc in zip(scores, self.bm25_retriever.docs)
-            if cumple_filtro(doc.metadata, filtro)
+            if score > 0 and cumple_filtro(doc.metadata, filtro)
         ]
         candidatos.sort(key=lambda par: par[0], reverse=True)
         return [doc for _, doc in candidatos[: self.k]]
 
     def retrieve_vector(self, query: str, filtro: dict | None = None) -> list[Document]:
-        if not filtro:
-            return self.vector_retriever.invoke(query)[: self.k]
-        # Pinecone aplica el filtro del lado del servidor, dentro del namespace.
-        return self.vectorstore.similarity_search(query, k=self.k, filter=filtro)
+        return [doc for doc, _ in self._vector_con_scores(query, filtro)]
+
+    def _vector_con_scores(self, query: str, filtro: dict | None = None) -> list[tuple[Document, float]]:
+        # Pinecone aplica el filtro del lado del servidor, dentro del namespace,
+        # y devuelve la similitud coseno de cada chunk.
+        return self.vectorstore.similarity_search_with_score(query, k=self.k, filter=filtro)
 
     def retrieve_con_scores(
         self, query: str, filtro: dict | None = None
-    ) -> list[tuple[Document, float, list[str]]]:
-        """Top-k híbrido con el score combinado de cada chunk y qué recuperador lo trajo.
+    ) -> tuple[list[Fragmento], float]:
+        """Top-k híbrido con el score combinado de cada chunk, y la similitud máxima.
 
-        Devuelve el mismo ranking que `retrieve` (misma fusión RRF sobre los
-        mismos dos rankings), pero con el score que el EnsembleRetriever calcula
-        internamente y no expone: sum(peso / (posición + c)) sobre cada ranking
-        en el que aparece el chunk.
+        El score es el que el EnsembleRetriever calcula internamente y no
+        expone: sum(peso / (posición + c)) sobre cada ranking en el que aparece
+        el chunk.
+
+        Un recuperador top-k siempre devuelve k resultados, aunque la pregunta
+        no tenga nada que ver con el corpus. Si la similitud coseno del mejor
+        chunk vectorial queda por debajo de `min_similitud`, se considera que
+        la pregunta está fuera del dominio y se devuelve una lista vacía.
         """
-        rankings = {"bm25": self.retrieve_bm25(query, filtro), "vector": self.retrieve_vector(query, filtro)}
+        vectoriales = self._vector_con_scores(query, filtro)
+        similitud_max = max((s for _, s in vectoriales), default=0.0)
+        if similitud_max < self.min_similitud:
+            return [], similitud_max
+
+        rankings = {"bm25": self.retrieve_bm25(query, filtro), "vector": [d for d, _ in vectoriales]}
         scores: dict[str, float] = defaultdict(float)
         origen: dict[str, list[str]] = defaultdict(list)
         for (nombre, docs), peso in zip(rankings.items(), self.ensemble.weights):
@@ -220,16 +246,22 @@ class RAGSystem:
                 cid = doc.metadata["chunk_id"]
                 scores[cid] += peso / (rank + self.ensemble.c)
                 origen[cid].append(nombre)
+        similitud = {d.metadata["chunk_id"]: s for d, s in vectoriales}
         fusion = self.ensemble.weighted_reciprocal_rank(list(rankings.values()))[: self.k]
-        return [(d, scores[d.metadata["chunk_id"]], origen[d.metadata["chunk_id"]]) for d in fusion]
-
+        fragmentos = []
+        for d in fusion:
+            cid = d.metadata["chunk_id"]
+            fragmentos.append(Fragmento(d, scores[cid], origen[cid], similitud.get(cid)))
+        return fragmentos, similitud_max
 
 def _extracto(text: str, n: int) -> str:
     text = " ".join(text.split())
     return text if len(text) <= n else text[:n].rstrip() + "..."
 
 
-def resultado_json(rag: RAGSystem, query: str, filtro: dict | None, resultados) -> dict:
+def resultado_json(
+    rag: RAGSystem, query: str, filtro: dict | None, resultados: list[Fragmento], similitud_max: float
+) -> dict:
     """Salida estructurada de una consulta: metadata de cada chunk + score combinado."""
     fragmentos = [
         {
@@ -240,13 +272,15 @@ def resultado_json(rag: RAGSystem, query: str, filtro: dict | None, resultados) 
             "seccion": d.metadata.get("section"),
             # Pinecone devuelve los números de la metadata como float (2.0).
             "page": int(d.metadata["page"]) if d.metadata.get("page") is not None else None,
-            "score_combinado": round(score, 4),
-            "recuperado_por": origen,
+            "score_combinado": round(f.score, 4),
+            "similitud_coseno": round(f.similitud, 3) if f.similitud is not None else None,
+            "recuperado_por": f.origen,
             "extracto": _extracto(d.page_content, 200),
         }
-        for d, score, origen in resultados
+        for f in resultados
+        for d in [f.doc]
     ]
-    return {
+    salida = {
         "pregunta": query,
         "estrategia_recuperacion": "hibrida_ensemble (bm25 + pinecone_dense, RRF)",
         "pesos": {"bm25": rag.ensemble.weights[0], "vector": rag.ensemble.weights[1]},
@@ -254,9 +288,17 @@ def resultado_json(rag: RAGSystem, query: str, filtro: dict | None, resultados) 
         "namespace": rag.namespace,
         "filtro": filtro,
         "top_k": rag.k,
+        "similitud_maxima": round(similitud_max, 3),
+        "umbral_similitud": rag.min_similitud,
         "fragmentos_recuperados": fragmentos,
         "fuentes": list(dict.fromkeys(f["fuente"] for f in fragmentos)),
     }
+    if not fragmentos:
+        salida["mensaje"] = (
+            f"Sin resultados relevantes: la similitud máxima ({similitud_max:.3f}) está por debajo "
+            f"del umbral ({rag.min_similitud}). La pregunta parece estar fuera de la documentación indexada."
+        )
+    return salida
 
 
 def main() -> None:
@@ -273,7 +315,7 @@ def main() -> None:
         filtro = {**(filtro or {}), "category": args.categoria}
 
     rag = RAGSystem()
-    salida = resultado_json(rag, args.query, filtro, rag.retrieve_con_scores(args.query, filtro))
+    salida = resultado_json(rag, args.query, filtro, *rag.retrieve_con_scores(args.query, filtro))
     if args.json:
         print(json.dumps(salida, ensure_ascii=False, indent=2))
         return
@@ -285,7 +327,10 @@ def main() -> None:
     )
     if filtro:
         print(f"Filtro de metadata: {json.dumps(filtro, ensure_ascii=False)}")
-    print(f"Top-{rag.k}:")
+    if not salida["fragmentos_recuperados"]:
+        print(salida["mensaje"])
+        return
+    print(f"Top-{rag.k} (similitud coseno máxima {salida['similitud_maxima']:.3f}, umbral {rag.min_similitud}):")
     for rank, f in enumerate(salida["fragmentos_recuperados"], start=1):
         print(
             f"  {rank}. {f['chunk_id']:<24} score={f['score_combinado']:.4f}  [{f['categoria']}]  "

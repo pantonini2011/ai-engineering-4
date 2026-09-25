@@ -6,7 +6,7 @@ from langchain_core.documents import Document
 from langchain_core.runnables import RunnableLambda
 
 from src.rag_system import (
-    RAGSystem, bm25_tokenize, cumple_filtro, load_corpus_from_pinecone, resultado_json,
+    RAGSystem, bm25_tokenize, cumple_filtro, load_corpus_from_pinecone, Fragmento, resultado_json,
 )
 
 
@@ -108,23 +108,28 @@ CORPUS = [
 
 
 class FakeVectorStore:
-    """Sustituye a PineconeVectorStore: sin filtro devuelve el corpus en orden;
-    con filtro, lo aplica como haría Pinecone del lado del servidor."""
+    """Sustituye a PineconeVectorStore: devuelve el corpus en orden con una
+    similitud coseno decreciente a partir de `similitud`; con filtro, lo aplica
+    como haría Pinecone del lado del servidor."""
 
-    def __init__(self, docs):
+    def __init__(self, docs, similitud=0.8):
         self.docs = docs
+        self.similitud = similitud
         self.filtros_recibidos = []
 
     def as_retriever(self, search_kwargs):
         return RunnableLambda(lambda q: self.docs[: search_kwargs["k"]])
 
-    def similarity_search(self, query, k, filter):
+    def similarity_search_with_score(self, query, k, filter):
         self.filtros_recibidos.append(filter)
-        return [d for d in self.docs if cumple_filtro(d.metadata, filter)][:k]
+        docs = [d for d in self.docs if cumple_filtro(d.metadata, filter)][:k]
+        return [(d, self.similitud - 0.05 * i) for i, d in enumerate(docs)]
 
 
-def _rag(k=3):
-    return RAGSystem(k=k, corpus=CORPUS, vectorstore=FakeVectorStore(CORPUS))
+def _rag(k=3, similitud=0.8):
+    return RAGSystem(
+        k=k, corpus=CORPUS, vectorstore=FakeVectorStore(CORPUS, similitud), min_similitud=0.38
+    )
 
 
 def test_retrieve_sin_filtro_usa_todo_el_corpus():
@@ -148,33 +153,49 @@ def test_bm25_filtra_antes_de_cortar_el_top_k():
     assert doc.metadata["category"] == "seguridad"
 
 
+def test_bm25_descarta_chunks_sin_terminos_en_comun():
+    # Solo body#001 menciona "Pydantic": BM25 no rellena el top-k con chunks de score 0.
+    assert [d.metadata["chunk_id"] for d in _rag().retrieve_bm25("Pydantic")] == ["body#001"]
+    assert _rag().retrieve_bm25("vacaciones") == []
+
+
 def test_filtro_sin_coincidencias_devuelve_lista_vacia():
     assert _rag().retrieve("headers", filtro={"category": "inexistente"}) == []
+
+
+def test_pregunta_fuera_del_dominio_devuelve_lista_vacia():
+    # Similitud máxima 0.21 (como "¿Cuándo me puedo tomar vacaciones?") < umbral 0.38.
+    rag = _rag(similitud=0.21)
+    fragmentos, similitud_max = rag.retrieve_con_scores("headers")
+    assert fragmentos == [] and similitud_max == pytest.approx(0.21)
+    assert rag.retrieve("headers") == []
 
 
 # --- Score combinado y salida JSON ------------------------------------------
 
 def test_retrieve_con_scores_mismo_orden_que_retrieve_y_score_rrf():
     rag = _rag()
-    resultados = rag.retrieve_con_scores("headers")
-    assert [d.metadata["chunk_id"] for d, _, _ in resultados] == [
+    fragmentos, similitud_max = rag.retrieve_con_scores("headers")
+    assert similitud_max == pytest.approx(0.8)
+    assert [f.doc.metadata["chunk_id"] for f in fragmentos] == [
         d.metadata["chunk_id"] for d in rag.retrieve("headers")
     ]
-    scores = [s for _, s, _ in resultados]
+    scores = [f.score for f in fragmentos]
     assert scores == sorted(scores, reverse=True)
     # Un chunk que traen los dos recuperadores suma peso / (posición + c) de cada ranking.
     bm25 = [d.metadata["chunk_id"] for d in rag.retrieve_bm25("headers")]
     vec = [d.metadata["chunk_id"] for d in rag.retrieve_vector("headers")]
-    doc, score, origen = next(r for r in resultados if r[2] == ["bm25", "vector"])
-    cid = doc.metadata["chunk_id"]
+    f = next(f for f in fragmentos if f.origen == ["bm25", "vector"])
+    cid = f.doc.metadata["chunk_id"]
     w_bm25, w_vec = rag.ensemble.weights
     c = rag.ensemble.c
-    assert score == pytest.approx(w_bm25 / (bm25.index(cid) + 1 + c) + w_vec / (vec.index(cid) + 1 + c))
+    assert f.score == pytest.approx(w_bm25 / (bm25.index(cid) + 1 + c) + w_vec / (vec.index(cid) + 1 + c))
+    assert f.similitud == pytest.approx(0.8 - 0.05 * vec.index(cid))
 
 
 def test_retrieve_con_scores_respeta_el_filtro():
-    resultados = _rag().retrieve_con_scores("headers", filtro={"category": "seguridad"})
-    assert {d.metadata["category"] for d, _, _ in resultados} == {"seguridad"}
+    fragmentos, _ = _rag().retrieve_con_scores("headers", filtro={"category": "seguridad"})
+    assert {f.doc.metadata["category"] for f in fragmentos} == {"seguridad"}
 
 
 def test_resultado_json_incluye_metadata_score_y_namespace():
@@ -184,10 +205,18 @@ def test_resultado_json_incluye_metadata_score_y_namespace():
         metadata={"chunk_id": "cors#002", "doc_id": "cors", "source": "data/docs/cors.md",
                   "category": "seguridad", "section": "Usa CORSMiddleware", "page": 2.0},
     )
-    salida = resultado_json(rag, "¿CORS?", None, [(doc, 0.016393, ["bm25", "vector"])])
+    salida = resultado_json(rag, "¿CORS?", None, [Fragmento(doc, 0.016393, ["bm25", "vector"], 0.6321)], 0.6321)
     assert salida["namespace"] == rag.namespace and salida["top_k"] == rag.k
+    assert salida["similitud_maxima"] == 0.632 and "mensaje" not in salida
     (f,) = salida["fragmentos_recuperados"]
     assert f["fuente"] == "data/docs/cors.md" and f["page"] == 2 and f["categoria"] == "seguridad"
-    assert f["score_combinado"] == 0.0164 and f["recuperado_por"] == ["bm25", "vector"]
+    assert f["score_combinado"] == 0.0164 and f["similitud_coseno"] == 0.632
+    assert f["recuperado_por"] == ["bm25", "vector"]
     assert f["extracto"].startswith("## Usa CORSMiddleware x") and len(f["extracto"]) <= 203
     assert salida["fuentes"] == ["data/docs/cors.md"]
+
+
+def test_resultado_json_sin_resultados_explica_por_que():
+    salida = resultado_json(_rag(), "¿Vacaciones?", None, [], 0.21)
+    assert salida["fragmentos_recuperados"] == [] and salida["fuentes"] == []
+    assert "fuera de la documentación" in salida["mensaje"]

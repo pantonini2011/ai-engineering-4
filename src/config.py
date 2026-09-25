@@ -54,6 +54,11 @@ MAX_RETRIES = 4
 TOP_K = 5
 # Peso de cada recuperador en el EnsembleRetriever: [BM25, vectorial].
 ENSEMBLE_WEIGHTS = [0.5, 0.5]
+# Similitud coseno mínima del mejor chunk vectorial para considerar que la
+# pregunta es del dominio. Por debajo, el sistema responde "sin resultados"
+# en vez de devolver los 5 chunks menos lejanos. Medido sobre este corpus:
+# preguntas del golden set 0.45-0.63; preguntas fuera de tema 0.12-0.31.
+MIN_SIMILITUD = float(os.getenv("MIN_SIMILITUD", "0.38"))
 
 
 def setup_logging() -> None:
