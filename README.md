@@ -303,7 +303,7 @@ python -m src.rag_system "¿Cómo agrego headers personalizados a la respuesta?"
 python -m src.rag_system "¿Cómo agrego headers?" --filtro '{"page": {"$lte": 1}}'        # bash / Linux / macOS
 python -m src.rag_system "¿Cómo agrego headers?" --filtro '{\"page\": {\"$lte\": 1}}'    # PowerShell 5.1
 
-# Evaluación: Precision@5 y Recall@5 sobre el golden set
+# Evaluación: Precision@5 y Recall@5 sobre el golden set (evaluate.py está en la raíz, no en src/)
 python evaluate.py
 ```
 
