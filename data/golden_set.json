@@ -1,0 +1,22 @@
+[
+  {
+    "pregunta": "How do I allow a frontend running on another origin to call my API from the browser?",
+    "documento_id_esperado": "cors"
+  },
+  {
+    "pregunta": "How can I send an email notification after returning the response, without making the client wait?",
+    "documento_id_esperado": "background-tasks"
+  },
+  {
+    "pregunta": "What does include_router do and how do I split my app into multiple files?",
+    "documento_id_esperado": "bigger-applications"
+  },
+  {
+    "pregunta": "How do I return a 404 with HTTPException when an item is not found?",
+    "documento_id_esperado": "handling-errors"
+  },
+  {
+    "pregunta": "How do I create a SQLModel Session dependency to save a Hero in the database?",
+    "documento_id_esperado": "sql-databases"
+  }
+]

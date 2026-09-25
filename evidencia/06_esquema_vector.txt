@@ -1,0 +1,17 @@
+id: cors#002
+dimension del vector: 1536
+metadata:
+{
+  "category": "seguridad",
+  "chunk_id": "cors#002",
+  "created_at": "2026-09-25T01:38:37+00:00",
+  "doc_id": "cors",
+  "env": "dev",
+  "n_tokens": 596.0,
+  "page": 2.0,
+  "section": "Use `CORSMiddleware`",
+  "source": "data/docs/cors.md",
+  "text": "## Use `CORSMiddleware`\n\nYou can configure it in your **FastAPI** application using the `CORSMiddleware`.\n\n* Import `CORSMiddleware`.\n* Create a list of allowed origins (as strings).\n* Add it as a \"middleware\" to your **FastAPI** application.\n\nYou can also specify whether your backend allows:\n\n* Cre ...[recortado]"
+}
+
+describe_index_stats: dimension=1536, total=55, namespaces={'dev': 55}

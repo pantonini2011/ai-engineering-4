@@ -1,0 +1,19 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Material del curso (no es parte del entregable)
+*.docx
+
+# Ejercicios 1 y 2 del módulo (fuera del entregable)
+ejercico1_PINECONE*.py
+ejercicio2.py
+correcci*n_ej1.md
+justificacion_ej1.md

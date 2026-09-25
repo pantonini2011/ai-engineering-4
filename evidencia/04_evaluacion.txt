@@ -1,0 +1,45 @@
+22:39:25 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+22:39:25 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+22:39:27 INFO src.rag_system: Corpus BM25: 55 chunks leídos de Pinecone (namespace 'dev')
+
+==============================================================================
+EVALUACIÓN DEL RECUPERADOR — índice 'fastapi-docs-rag', namespace 'dev'
+Golden set: 5 preguntas · k=5 · pesos Ensemble [BM25, vector]=[0.5, 0.5]
+==============================================================================
+
+Detalle por pregunta (modo híbrido):
+
+[1] How do I allow a frontend running on another origin to call my API from the browser?
+    esperado: cors
+    top-5:   ['cors', 'cors', 'bigger-applications', 'cors', 'first-steps']
+    relevantes: ✔ ✔ · ✔ ·  ->  Recall@5=1  Precision@5=0.60  RR=1.00
+
+[2] How can I send an email notification after returning the response, without making the client wait?
+    esperado: background-tasks
+    top-5:   ['background-tasks', 'handling-errors', 'middleware', 'first-steps', 'body']
+    relevantes: ✔ · · · ·  ->  Recall@5=1  Precision@5=0.20  RR=1.00
+
+[3] What does include_router do and how do I split my app into multiple files?
+    esperado: bigger-applications
+    top-5:   ['bigger-applications', 'bigger-applications', 'bigger-applications', 'bigger-applications', 'bigger-applications']
+    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Recall@5=1  Precision@5=1.00  RR=1.00
+
+[4] How do I return a 404 with HTTPException when an item is not found?
+    esperado: handling-errors
+    top-5:   ['handling-errors', 'handling-errors', 'handling-errors', 'handling-errors', 'body']
+    relevantes: ✔ ✔ ✔ ✔ ·  ->  Recall@5=1  Precision@5=0.80  RR=1.00
+
+[5] How do I create a SQLModel Session dependency to save a Hero in the database?
+    esperado: sql-databases
+    top-5:   ['sql-databases', 'sql-databases', 'sql-databases', 'sql-databases', 'sql-databases']
+    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Recall@5=1  Precision@5=1.00  RR=1.00
+
+Modo                       Precision@5    Recall@5     MRR
+----------------------------------------------------------
+BM25 (léxico)                     0.72        1.00    1.00
+Vectorial (Pinecone)              0.72        1.00    1.00
+Híbrido (Ensemble)                0.72        1.00    1.00
+----------------------------------------------------------
+Precision@5 máxima alcanzable con este corpus: 0.76 (según cuántos chunks tiene cada documento esperado).
+
+Resumen: el recuperador híbrido encontró el documento correcto en 5/5 preguntas (Recall@5=1.00); en promedio 3.6 de cada 5 chunks recuperados son del documento correcto (Precision@5=0.72).

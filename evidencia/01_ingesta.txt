@@ -1,0 +1,7 @@
+22:38:36 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+22:38:37 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+22:38:37 INFO __main__: 12 documentos -> 55 chunks (tokens por chunk: min=68, prom=433, max=596)
+22:38:38 INFO __main__: Generando 55 embeddings con text-embedding-3-small...
+22:38:39 INFO httpx2: HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+22:38:41 INFO __main__: Upsert lote 1: 55 vectores
+22:38:42 INFO __main__: Ingesta completa: 55 vectores subidos; namespace 'dev' del índice 'fastapi-docs-rag' tiene 55.

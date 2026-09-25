@@ -1,0 +1,25 @@
+# Versiones fijadas (==): las verificadas con la suite de tests y con las
+# corridas reales de evidencia/ (Python 3.12).
+
+python-dotenv==1.2.3
+
+# Pinecone (SDK nativo) + integración LangChain (PineconeVectorStore)
+pinecone==7.3.0
+langchain-pinecone==0.2.13
+
+# Embeddings OpenAI text-embedding-3-small (1536 dims)
+openai==3.19.2
+langchain-openai==1.6.6
+
+# Núcleo LangChain y chunking (RecursiveCharacterTextSplitter medido en tokens)
+langchain-core==1.6.5
+langchain-text-splitters==1.1.2
+tiktoken==0.14.0
+
+# Recuperador híbrido: BM25Retriever (community) + EnsembleRetriever (classic,
+# en LangChain 1.x ya no está en el paquete `langchain`)
+langchain-community==0.4.2
+langchain-classic==1.0.8
+rank-bm25==0.2.2
+
+pytest==9.1.1
