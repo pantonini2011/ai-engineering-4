@@ -414,19 +414,52 @@ conocido. Un chunk recuperado cuenta como relevante si su `metadata.doc_id` coin
 - **Recall@5**: ¿aparece el documento correcto entre los 5 recuperados? (1 o 0)
 - **Precision@5**: qué fracción de los 5 chunks recuperados son del documento correcto
 - **MRR** (extra): 1 / posición del primer chunk relevante
+- **Hit Rate**: fracción de preguntas con al menos un chunk relevante en el top-5. Con un solo
+  documento relevante por pregunta coincide con Recall@5.
 
-| # | Pregunta | Doc. esperado | Chunks del doc. | Recall@5 | Precision@5 (híbrido) |
-|---|---|---|---|---|---|
-| 1 | ¿Cómo permito que un frontend que corre en otro origen llame a mi API desde el navegador? | `cors` | 4 | 1 | 0.60 |
-| 2 | ¿Cómo envío una notificación por email después de devolver la respuesta, sin que el cliente tenga que esperar? | `background-tasks` | 3 | 1 | 0.40 |
-| 3 | ¿Qué hace `include_router` y cómo divido mi aplicación en varios archivos? | `bigger-applications` | 14 | 1 | 1.00 |
-| 4 | ¿Cómo devuelvo un error 404 con `HTTPException` cuando no se encuentra un item? | `handling-errors` | 4 | 1 | 0.80 |
-| 5 | ¿Cómo creo una dependencia de `Session` de SQLModel para guardar un `Hero` en la base de datos? | `sql-databases` | 8 | 1 | 1.00 |
+| # | Pregunta | Doc. esperado | Chunks del doc. | Hit | Recall@5 | Precision@5 (híbrido) | RR |
+|---|---|---|---|---|---|---|---|
+| 1 | ¿Cómo permito que un frontend que corre en otro origen llame a mi API desde el navegador? | `cors` | 4 | SÍ | 1 | 0.60 | 1.00 |
+| 2 | ¿Cómo envío una notificación por email después de devolver la respuesta, sin que el cliente tenga que esperar? | `background-tasks` | 3 | SÍ | 1 | 0.40 | 1.00 |
+| 3 | ¿Qué hace `include_router` y cómo divido mi aplicación en varios archivos? | `bigger-applications` | 14 | SÍ | 1 | 1.00 | 1.00 |
+| 4 | ¿Cómo devuelvo un error 404 con `HTTPException` cuando no se encuentra un item? | `handling-errors` | 4 | SÍ | 1 | 0.80 | 1.00 |
+| 5 | ¿Cómo creo una dependencia de `Session` de SQLModel para guardar un `Hero` en la base de datos? | `sql-databases` | 8 | SÍ | 1 | 1.00 | 1.00 |
 
 ### 6.2 Salida del script
 
-Resumen de `python evaluate.py` (la salida completa, con el detalle por pregunta, está en
-[`evidencia/04_evaluacion.txt`](evidencia/04_evaluacion.txt)):
+Salida de `python evaluate.py` (completa, con los logs, en
+[`evidencia/04_evaluacion.txt`](evidencia/04_evaluacion.txt)).
+
+Detalle por pregunta del modo híbrido (✔ = chunk del documento esperado):
+
+```
+[1] ¿Cómo permito que un frontend que corre en otro origen llame a mi API desde el navegador?
+    esperado: cors
+    top-5:   ['cors', 'handling-errors', 'cors', 'first-steps', 'cors']
+    relevantes: ✔ · ✔ · ✔  ->  Hit: SÍ  Recall@5=1  Precision@5=0.60  RR=1.00
+
+[2] ¿Cómo envío una notificación por email después de devolver la respuesta, sin que el cliente tenga que esperar?
+    esperado: background-tasks
+    top-5:   ['background-tasks', 'background-tasks', 'handling-errors', 'sql-databases', 'middleware']
+    relevantes: ✔ ✔ · · ·  ->  Hit: SÍ  Recall@5=1  Precision@5=0.40  RR=1.00
+
+[3] ¿Qué hace include_router y cómo divido mi aplicación en varios archivos?
+    esperado: bigger-applications
+    top-5:   ['bigger-applications', 'bigger-applications', 'bigger-applications', 'bigger-applications', 'bigger-applications']
+    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Hit: SÍ  Recall@5=1  Precision@5=1.00  RR=1.00
+
+[4] ¿Cómo devuelvo un error 404 con HTTPException cuando no se encuentra un item?
+    esperado: handling-errors
+    top-5:   ['handling-errors', 'handling-errors', 'handling-errors', 'handling-errors', 'body']
+    relevantes: ✔ ✔ ✔ ✔ ·  ->  Hit: SÍ  Recall@5=1  Precision@5=0.80  RR=1.00
+
+[5] ¿Cómo creo una dependencia de Session de SQLModel para guardar un Hero en la base de datos?
+    esperado: sql-databases
+    top-5:   ['sql-databases', 'sql-databases', 'sql-databases', 'sql-databases', 'sql-databases']
+    relevantes: ✔ ✔ ✔ ✔ ✔  ->  Hit: SÍ  Recall@5=1  Precision@5=1.00  RR=1.00
+```
+
+Métricas por modo y globales:
 
 ```
 Modo                       Precision@5    Recall@5     MRR
@@ -443,8 +476,7 @@ MÉTRICAS GLOBALES DEL HÍBRIDO SOBRE 5 PREGUNTAS (namespace 'dev'):
   • Hit Rate:             1.00 (5/5)
   • MRR:                  1.00
 
-Resumen: el recuperador híbrido encontró el documento correcto en 5/5 preguntas (Recall@5=1.00);
-en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precision@5=0.76).
+Resumen: el recuperador híbrido encontró el documento correcto en 5/5 preguntas (Recall@5=1.00); en promedio 3.8 de cada 5 chunks recuperados son del documento correcto (Precision@5=0.76).
 ```
 
 ### 6.3 Análisis
