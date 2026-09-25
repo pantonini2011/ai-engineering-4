@@ -1,144 +1,144 @@
-# Query Parameters { #query-parameters }
+# Parámetros de Query { #query-parameters }
 
-When you declare other function parameters that are not part of the path parameters, they are automatically interpreted as "query" parameters.
+Cuando declaras otros parámetros de función que no son parte de los parámetros de path, son automáticamente interpretados como parámetros de "query".
 
 {* ../../docs_src/query_params/tutorial001_py310.py hl[9] *}
 
-The query is the set of key-value pairs that go after the `?` in a URL, separated by `&` characters.
+La query es el conjunto de pares clave-valor que van después del `?` en una URL, separados por caracteres `&`.
 
-For example, in the URL:
+Por ejemplo, en la URL:
 
 ```
 http://127.0.0.1:8000/items/?skip=0&limit=10
 ```
 
-...the query parameters are:
+...los parámetros de query son:
 
-* `skip`: with a value of `0`
-* `limit`: with a value of `10`
+* `skip`: con un valor de `0`
+* `limit`: con un valor de `10`
 
-As they are part of the URL, they are "naturally" strings.
+Como son parte de la URL, son "naturalmente" strings.
 
-But when you declare them with Python types (in the example above, as `int`), they are converted to that type and validated against it.
+Pero cuando los declaras con tipos de Python (en el ejemplo anterior, como `int`), son convertidos a ese tipo y validados respecto a él.
 
-All the same processes that apply to path parameters also apply to query parameters:
+Todo el mismo proceso que se aplica para los parámetros de path también se aplica para los parámetros de query:
 
-* Editor support (obviously)
-* Data <dfn title="converting the string that comes from an HTTP request into Python data">"parsing"</dfn>
-* Data validation
-* Automatic documentation
+* Soporte del editor (obviamente)
+* <dfn title="convirtiendo el string que viene de un request HTTP en datos de Python">"parsing"</dfn> de datos
+* Validación de datos
+* Documentación automática
 
-## Defaults { #defaults }
+## Valores por defecto { #defaults }
 
-As query parameters are not a fixed part of a path, they can be optional and can have default values.
+Como los parámetros de query no son una parte fija de un path, pueden ser opcionales y pueden tener valores por defecto.
 
-In the example above they have default values of `skip=0` and `limit=10`.
+En el ejemplo anterior, tienen valores por defecto de `skip=0` y `limit=10`.
 
-So, going to the URL:
+Entonces, ir a la URL:
 
 ```
 http://127.0.0.1:8000/items/
 ```
 
-would be the same as going to:
+sería lo mismo que ir a:
 
 ```
 http://127.0.0.1:8000/items/?skip=0&limit=10
 ```
 
-But if you go to, for example:
+Pero si vas a, por ejemplo:
 
 ```
 http://127.0.0.1:8000/items/?skip=20
 ```
 
-The parameter values in your function will be:
+Los valores de los parámetros en tu función serán:
 
-* `skip=20`: because you set it in the URL
-* `limit=10`: because that was the default value
+* `skip=20`: porque lo configuraste en la URL
+* `limit=10`: porque ese era el valor por defecto
 
-## Optional parameters { #optional-parameters }
+## Parámetros opcionales { #optional-parameters }
 
-The same way, you can declare optional query parameters, by setting their default to `None`:
+De la misma manera, puedes declarar parámetros de query opcionales, estableciendo su valor por defecto en `None`:
 
 {* ../../docs_src/query_params/tutorial002_py310.py hl[7] *}
 
-In this case, the function parameter `q` will be optional, and will be `None` by default.
+En este caso, el parámetro de función `q` será opcional y será `None` por defecto.
 
-/// tip
+/// tip | Consejo
 
-Also notice that **FastAPI** is smart enough to notice that the path parameter `item_id` is a path parameter and `q` is not, so, it's a query parameter.
+Además, nota que **FastAPI** es lo suficientemente inteligente para notar que el parámetro de path `item_id` es un parámetro de path y `q` no lo es, por lo tanto, es un parámetro de query.
 
 ///
 
-## Query parameter type conversion { #query-parameter-type-conversion }
+## Conversión de tipos en parámetros de query { #query-parameter-type-conversion }
 
-You can also declare `bool` types, and they will be converted:
+También puedes declarar tipos `bool`, y serán convertidos:
 
 {* ../../docs_src/query_params/tutorial003_py310.py hl[7] *}
 
-In this case, if you go to:
+En este caso, si vas a:
 
 ```
 http://127.0.0.1:8000/items/foo?short=1
 ```
 
-or
+o
 
 ```
 http://127.0.0.1:8000/items/foo?short=True
 ```
 
-or
+o
 
 ```
 http://127.0.0.1:8000/items/foo?short=true
 ```
 
-or
+o
 
 ```
 http://127.0.0.1:8000/items/foo?short=on
 ```
 
-or
+o
 
 ```
 http://127.0.0.1:8000/items/foo?short=yes
 ```
 
-or any other case variation (uppercase, first letter in uppercase, etc), your function will see the parameter `short` with a `bool` value of `True`. Otherwise as `False`.
+o cualquier otra variación (mayúsculas, primera letra en mayúscula, etc.), tu función verá el parámetro `short` con un valor `bool` de `True`. De lo contrario, será `False`.
 
 
-## Multiple path and query parameters { #multiple-path-and-query-parameters }
+## Múltiples parámetros de path y de query { #multiple-path-and-query-parameters }
 
-You can declare multiple path parameters and query parameters at the same time, **FastAPI** knows which is which.
+Puedes declarar múltiples parámetros de path y de query al mismo tiempo, **FastAPI** sabe cuál es cuál.
 
-And you don't have to declare them in any specific order.
+Y no tienes que declararlos en un orden específico.
 
-They will be detected by name:
+Serán detectados por nombre:
 
 {* ../../docs_src/query_params/tutorial004_py310.py hl[6,8] *}
 
-## Required query parameters { #required-query-parameters }
+## Parámetros de query requeridos { #required-query-parameters }
 
-When you declare a default value for non-path parameters (for now, we have only seen query parameters), then it is not required.
+Cuando declaras un valor por defecto para parámetros que no son de path (por ahora, solo hemos visto parámetros de query), entonces no es requerido.
 
-If you don't want to add a specific value but just make it optional, set the default as `None`.
+Si no quieres agregar un valor específico pero solo hacer que sea opcional, establece el valor por defecto como `None`.
 
-But when you want to make a query parameter required, you can just not declare any default value:
+Pero cuando quieres hacer un parámetro de query requerido, simplemente no declares ningún valor por defecto:
 
 {* ../../docs_src/query_params/tutorial005_py310.py hl[6:7] *}
 
-Here the query parameter `needy` is a required query parameter of type `str`.
+Aquí el parámetro de query `needy` es un parámetro de query requerido de tipo `str`.
 
-If you open in your browser a URL like:
+Si abres en tu navegador una URL como:
 
 ```
 http://127.0.0.1:8000/items/foo-item
 ```
 
-...without adding the required parameter `needy`, you will see an error like:
+...sin agregar el parámetro requerido `needy`, verás un error como:
 
 ```JSON
 {
@@ -156,13 +156,13 @@ http://127.0.0.1:8000/items/foo-item
 }
 ```
 
-As `needy` is a required parameter, you would need to set it in the URL:
+Como `needy` es un parámetro requerido, necesitarías establecerlo en la URL:
 
 ```
 http://127.0.0.1:8000/items/foo-item?needy=sooooneedy
 ```
 
-...this would work:
+...esto funcionaría:
 
 ```JSON
 {
@@ -171,18 +171,18 @@ http://127.0.0.1:8000/items/foo-item?needy=sooooneedy
 }
 ```
 
-And of course, you can define some parameters as required, some as having a default value, and some entirely optional:
+Y por supuesto, puedes definir algunos parámetros como requeridos, algunos con un valor por defecto, y algunos enteramente opcionales:
 
 {* ../../docs_src/query_params/tutorial006_py310.py hl[8] *}
 
-In this case, there are 3 query parameters:
+En este caso, hay 3 parámetros de query:
 
-* `needy`, a required `str`.
-* `skip`, an `int` with a default value of `0`.
-* `limit`, an optional `int`.
+* `needy`, un `str` requerido.
+* `skip`, un `int` con un valor por defecto de `0`.
+* `limit`, un `int` opcional.
 
-/// tip
+/// tip | Consejo
 
-You could also use `Enum`s the same way as with [Path Parameters](path-params.md#predefined-values).
+También podrías usar `Enum`s de la misma manera que con [Parámetros de Path](path-params.md#predefined-values).
 
 ///

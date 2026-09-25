@@ -1,22 +1,22 @@
 [
   {
-    "pregunta": "How do I allow a frontend running on another origin to call my API from the browser?",
+    "pregunta": "¿Cómo permito que un frontend que corre en otro origen llame a mi API desde el navegador?",
     "documento_id_esperado": "cors"
   },
   {
-    "pregunta": "How can I send an email notification after returning the response, without making the client wait?",
+    "pregunta": "¿Cómo envío una notificación por email después de devolver la respuesta, sin que el cliente tenga que esperar?",
     "documento_id_esperado": "background-tasks"
   },
   {
-    "pregunta": "What does include_router do and how do I split my app into multiple files?",
+    "pregunta": "¿Qué hace include_router y cómo divido mi aplicación en varios archivos?",
     "documento_id_esperado": "bigger-applications"
   },
   {
-    "pregunta": "How do I return a 404 with HTTPException when an item is not found?",
+    "pregunta": "¿Cómo devuelvo un error 404 con HTTPException cuando no se encuentra un item?",
     "documento_id_esperado": "handling-errors"
   },
   {
-    "pregunta": "How do I create a SQLModel Session dependency to save a Hero in the database?",
+    "pregunta": "¿Cómo creo una dependencia de Session de SQLModel para guardar un Hero en la base de datos?",
     "documento_id_esperado": "sql-databases"
   }
 ]

@@ -1,106 +1,105 @@
-# Security { #security }
+# Seguridad { #security }
 
-There are many ways to handle security, authentication and authorization.
+Hay muchas formas de manejar la seguridad, autenticación y autorización.
 
-And it normally is a complex and "difficult" topic.
+Y normalmente es un tema complejo y "difícil".
 
-In many frameworks and systems just handling security and authentication takes a big amount of effort and code (in many cases it can be 50% or more of all the code written).
+En muchos frameworks y sistemas, solo manejar la seguridad y autenticación requiere una gran cantidad de esfuerzo y código (en muchos casos puede ser el 50% o más de todo el código escrito).
 
-**FastAPI** provides several tools to help you deal with **Security** easily, rapidly, in a standard way, without having to study and learn all the security specifications.
+**FastAPI** proporciona varias herramientas para ayudarte a manejar la **Seguridad** de manera fácil, rápida y estándar, sin tener que estudiar y aprender todas las especificaciones de seguridad.
 
-But first, let's check some small concepts.
+Pero primero, vamos a revisar algunos pequeños conceptos.
 
-## In a hurry? { #in-a-hurry }
+## ¿Con prisa? { #in-a-hurry }
 
-If you don't care about any of these terms and you just need to add security with authentication based on username and password *right now*, skip to the next chapters.
+Si no te importan ninguno de estos términos y solo necesitas agregar seguridad con autenticación basada en nombre de usuario y contraseña *ahora mismo*, salta a los siguientes capítulos.
 
 ## OAuth2 { #oauth2 }
 
-OAuth2 is a specification that defines several ways to handle authentication and authorization.
+OAuth2 es una especificación que define varias maneras de manejar la autenticación y autorización.
 
-It is quite an extensive specification and covers several complex use cases.
+Es una especificación bastante extensa y cubre varios casos de uso complejos.
 
-It includes ways to authenticate using a "third party".
+Incluye formas de autenticarse usando un "tercero".
 
-That's what all the systems with "login with Facebook, Google, X (Twitter), GitHub" use underneath.
+Eso es lo que todos los sistemas con "iniciar sesión con Facebook, Google, X (Twitter), GitHub" utilizan internamente.
 
 ### OAuth 1 { #oauth-1 }
 
-There was an OAuth 1, which is very different from OAuth2, and more complex, as it included direct specifications on how to encrypt the communication.
+Hubo un OAuth 1, que es muy diferente de OAuth2, y más complejo, ya que incluía especificaciones directas sobre cómo encriptar la comunicación.
 
-It is not very popular or used nowadays.
+No es muy popular o usado hoy en día.
 
-OAuth2 doesn't specify how to encrypt the communication, it expects you to have your application served with HTTPS.
+OAuth2 no especifica cómo encriptar la comunicación, espera que tengas tu aplicación servida con HTTPS.
 
-/// tip
+/// tip | Consejo
 
-In the section about **deployment** you will see how to set up HTTPS for free, using Traefik and Let's Encrypt.
+En la sección sobre **deployment** verás cómo configurar HTTPS de forma gratuita, usando Traefik y Let's Encrypt.
 
 ///
 
 ## OpenID Connect { #openid-connect }
 
-OpenID Connect is another specification, based on **OAuth2**.
+OpenID Connect es otra especificación, basada en **OAuth2**.
 
-It just extends OAuth2 specifying some things that are relatively ambiguous in OAuth2, to try to make it more interoperable.
+Solo extiende OAuth2 especificando algunas cosas que son relativamente ambiguas en OAuth2, para intentar hacerla más interoperable.
 
-For example, Google login uses OpenID Connect (which underneath uses OAuth2).
+Por ejemplo, el login de Google usa OpenID Connect (que internamente usa OAuth2).
 
-But Facebook login doesn't support OpenID Connect. It has its own flavor of OAuth2.
+Pero el login de Facebook no soporta OpenID Connect. Tiene su propia versión de OAuth2.
 
-### OpenID (not "OpenID Connect") { #openid-not-openid-connect }
+### OpenID (no "OpenID Connect") { #openid-not-openid-connect }
 
-There was also an "OpenID" specification. That tried to solve the same thing as **OpenID Connect**, but was not based on OAuth2.
+Hubo también una especificación "OpenID". Que intentaba resolver lo mismo que **OpenID Connect**, pero no estaba basada en OAuth2.
 
-So, it was a complete additional system.
+Entonces, era un sistema completo adicional.
 
-It is not very popular or used nowadays.
+No es muy popular o usado hoy en día.
 
 ## OpenAPI { #openapi }
 
-OpenAPI (previously known as Swagger) is the open specification for building APIs (now part of the Linux Foundation).
+OpenAPI (anteriormente conocido como Swagger) es la especificación abierta para construir APIs (ahora parte de la Linux Foundation).
 
-**FastAPI** is based on **OpenAPI**.
+**FastAPI** se basa en **OpenAPI**.
 
-That's what makes it possible to have multiple automatic interactive documentation interfaces, code generation, etc.
+Eso es lo que hace posible tener múltiples interfaces de documentación interactiva automática, generación de código, etc.
 
-OpenAPI has a way to define multiple security "schemes".
+OpenAPI tiene una forma de definir múltiples "esquemas" de seguridad.
 
-By using them, you can take advantage of all these standard-based tools, including these interactive documentation systems.
+Al usarlos, puedes aprovechar todas estas herramientas basadas en estándares, incluidos estos sistemas de documentación interactiva.
 
-OpenAPI defines the following security schemes:
+OpenAPI define los siguientes esquemas de seguridad:
 
-* `apiKey`: an application specific key that can come from:
-    * A query parameter.
-    * A header.
-    * A cookie.
-* `http`: standard HTTP authentication systems, including:
-    * `bearer`: a header `Authorization` with a value of `Bearer ` plus a token. This is inherited from OAuth2.
-    * HTTP Basic authentication.
-    * HTTP Digest, etc.
-* `oauth2`: all the OAuth2 ways to handle security (called "flows").
-    * Several of these flows are appropriate for building an OAuth 2.0 authentication provider (like Google, Facebook, X (Twitter), GitHub, etc):
-        * `implicit`
-        * `clientCredentials`
-        * `authorizationCode`
-    * But there is one specific "flow" that can be perfectly used for handling authentication in the same application directly:
-        * `password`: some next chapters will cover examples of this.
-* `openIdConnect`: has a way to define how to discover OAuth2 authentication data automatically.
-    * This automatic discovery is what is defined in the OpenID Connect specification.
+* `apiKey`: una clave específica de la aplicación que puede provenir de:
+  * Un parámetro de query.
+  * Un header.
+  * Una cookie.
+* `http`: sistemas de autenticación HTTP estándar, incluyendo:
+  * `bearer`: un header `Authorization` con un valor de `Bearer ` más un token. Esto se hereda de OAuth2.
+  * Autenticación básica HTTP.
+  * Digest HTTP, etc.
+* `oauth2`: todas las formas de OAuth2 para manejar la seguridad (llamadas "flujos").
+  * Varios de estos flujos son apropiados para construir un proveedor de autenticación OAuth 2.0 (como Google, Facebook, X (Twitter), GitHub, etc.):
+    * `implicit`
+    * `clientCredentials`
+    * `authorizationCode`
+  * Pero hay un "flujo" específico que puede usarse perfectamente para manejar la autenticación directamente en la misma aplicación:
+    * `password`: algunos de los próximos capítulos cubrirán ejemplos de esto.
+* `openIdConnect`: tiene una forma de definir cómo descubrir automáticamente los datos de autenticación OAuth2.
+  * Este descubrimiento automático es lo que se define en la especificación de OpenID Connect.
 
+/// tip | Consejo
 
-/// tip
+Integrar otros proveedores de autenticación/autorización como Google, Facebook, X (Twitter), GitHub, etc. también es posible y relativamente fácil.
 
-Integrating other authentication/authorization providers like Google, Facebook, X (Twitter), GitHub, etc. is also possible and relatively easy.
-
-The most complex problem is building an authentication/authorization provider like those, but **FastAPI** gives you the tools to do it easily, while doing the heavy lifting for you.
+El problema más complejo es construir un proveedor de autenticación/autorización como esos, pero **FastAPI** te da las herramientas para hacerlo fácilmente, mientras hace el trabajo pesado por ti.
 
 ///
 
-## **FastAPI** utilities { #fastapi-utilities }
+## Utilidades de **FastAPI** { #fastapi-utilities }
 
-FastAPI provides several tools for each of these security schemes in the `fastapi.security` module that simplify using these security mechanisms.
+FastAPI proporciona varias herramientas para cada uno de estos esquemas de seguridad en el módulo `fastapi.security` que simplifican el uso de estos mecanismos de seguridad.
 
-In the next chapters you will see how to add security to your API using those tools provided by **FastAPI**.
+En los siguientes capítulos verás cómo agregar seguridad a tu API usando esas herramientas proporcionadas por **FastAPI**.
 
-And you will also see how it gets automatically integrated into the interactive documentation system.
+Y también verás cómo se integra automáticamente en el sistema de documentación interactiva.

@@ -1,18 +1,18 @@
-# First Steps { #first-steps }
+# Primeros Pasos { #first-steps }
 
-The simplest FastAPI file could look like this:
+El archivo FastAPI más simple podría verse así:
 
 {* ../../docs_src/first_steps/tutorial001_py310.py *}
 
-Copy that to a file `main.py`.
+Copia eso en un archivo `main.py`.
 
-/// tip
+/// tip | Consejo
 
-FastAPI has an [official extension for VS Code](https://marketplace.visualstudio.com/items?itemName=FastAPILabs.fastapi-vscode) (and Cursor), which provides a lot of features, including a path operation explorer, path operation search, CodeLens navigation in tests (jump to definition from tests), and FastAPI Cloud deployment and logs, all from your editor.
+FastAPI tiene una [extensión oficial para VS Code](https://marketplace.visualstudio.com/items?itemName=FastAPILabs.fastapi-vscode) (y Cursor), que proporciona muchas funcionalidades, incluyendo un explorador de path operations, búsqueda de path operations, navegación CodeLens en tests (saltar a la definición desde los tests), y despliegue y logs de FastAPI Cloud, todo desde tu editor.
 
 ///
 
-Run the live server:
+Ejecuta el servidor en vivo:
 
 <div class="termy">
 
@@ -54,71 +54,71 @@ $ <font color="#4E9A06">uv run fastapi</font> dev
 
 </div>
 
-In the output, there's a line with something like:
+En el resultado, hay una línea con algo como:
 
 ```hl_lines="4"
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-That line shows the URL where your app is being served on your local machine.
+Esa línea muestra la URL donde tu aplicación está siendo servida, en tu máquina local.
 
-### Check it { #check-it }
+### Revisa { #check-it }
 
-Open your browser at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+Abre tu navegador en [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-You will see the JSON response as:
+Verás el response JSON como:
 
 ```JSON
 {"message": "Hello World"}
 ```
 
-### Interactive API docs { #interactive-api-docs }
+### Documentación interactiva de la API { #interactive-api-docs }
 
-Now go to [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+Ahora ve a [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
-You will see the automatic interactive API documentation (provided by [Swagger UI](https://github.com/swagger-api/swagger-ui)):
+Verás la documentación interactiva automática de la API (proporcionada por [Swagger UI](https://github.com/swagger-api/swagger-ui)):
 
 ![Swagger UI](https://fastapi.tiangolo.com/img/index/index-01-swagger-ui-simple.png)
 
-### Alternative API docs { #alternative-api-docs }
+### Documentación alternativa de la API { #alternative-api-docs }
 
-And now, go to [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc).
+Y ahora, ve a [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc).
 
-You will see the alternative automatic documentation (provided by [ReDoc](https://github.com/Redocly/redoc)):
+Verás la documentación alternativa automática (proporcionada por [ReDoc](https://github.com/Redocly/redoc)):
 
 ![ReDoc](https://fastapi.tiangolo.com/img/index/index-02-redoc-simple.png)
 
 ### OpenAPI { #openapi }
 
-**FastAPI** generates a "schema" with all your API using the **OpenAPI** standard for defining APIs.
+**FastAPI** genera un "esquema" con toda tu API utilizando el estándar **OpenAPI** para definir APIs.
 
-#### "Schema" { #schema }
+#### "Esquema" { #schema }
 
-A "schema" is a definition or description of something. Not the code that implements it, but just an abstract description.
+Un "esquema" es una definición o descripción de algo. No el código que lo implementa, sino solo una descripción abstracta.
 
-#### API "schema" { #api-schema }
+#### "Esquema" de la API { #api-schema }
 
-In this case, [OpenAPI](https://github.com/OAI/OpenAPI-Specification) is a specification that dictates how to define a schema of your API.
+En este caso, [OpenAPI](https://github.com/OAI/OpenAPI-Specification) es una especificación que dicta cómo definir un esquema de tu API.
 
-This schema definition includes your API paths, the possible parameters they take, etc.
+Esta definición de esquema incluye los paths de tu API, los posibles parámetros que toman, etc.
 
-#### Data "schema" { #data-schema }
+#### "Esquema" de datos { #data-schema }
 
-The term "schema" might also refer to the shape of some data, like a JSON content.
+El término "esquema" también podría referirse a la forma de algunos datos, como el contenido JSON.
 
-In that case, it would mean the JSON attributes, and data types they have, etc.
+En ese caso, significaría los atributos del JSON, los tipos de datos que tienen, etc.
 
-#### OpenAPI and JSON Schema { #openapi-and-json-schema }
+#### OpenAPI y JSON Schema { #openapi-and-json-schema }
 
-OpenAPI defines an API schema for your API. And that schema includes definitions (or "schemas") of the data sent and received by your API using **JSON Schema**, the standard for JSON data schemas.
+OpenAPI define un esquema de API para tu API. Y ese esquema incluye definiciones (o "esquemas") de los datos enviados y recibidos por tu API utilizando **JSON Schema**, el estándar para esquemas de datos JSON.
 
-#### Check the `openapi.json` { #check-the-openapi-json }
+#### Revisa el `openapi.json` { #check-the-openapi-json }
 
-If you are curious about what the raw OpenAPI schema looks like, FastAPI automatically generates a JSON (schema) with the descriptions of all your API.
+Si tienes curiosidad por cómo se ve el esquema OpenAPI en bruto, FastAPI automáticamente genera un JSON (esquema) con las descripciones de toda tu API.
 
-You can see it directly at: [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json).
+Puedes verlo directamente en: [http://127.0.0.1:8000/openapi.json](http://127.0.0.1:8000/openapi.json).
 
-It will show a JSON starting with something like:
+Mostrará un JSON que empieza con algo como:
 
 ```JSON
 {
@@ -141,30 +141,30 @@ It will show a JSON starting with something like:
 ...
 ```
 
-#### What is OpenAPI for { #what-is-openapi-for }
+#### Para qué sirve OpenAPI { #what-is-openapi-for }
 
-The OpenAPI schema is what powers the two interactive documentation systems included.
+El esquema OpenAPI es lo que impulsa los dos sistemas de documentación interactiva incluidos.
 
-And there are dozens of alternatives, all based on OpenAPI. You could easily add any of those alternatives to your application built with **FastAPI**.
+Y hay docenas de alternativas, todas basadas en OpenAPI. Podrías añadir fácilmente cualquiera de esas alternativas a tu aplicación construida con **FastAPI**.
 
-You could also use it to generate code automatically, for clients that communicate with your API. For example, frontend, mobile or IoT applications.
+También podrías usarlo para generar código automáticamente, para clientes que se comuniquen con tu API. Por ejemplo, aplicaciones frontend, móviles o IoT.
 
-### Configure the app `entrypoint` in `pyproject.toml` { #configure-the-app-entrypoint-in-pyproject-toml }
+### Configura el `entrypoint` de la app en `pyproject.toml` { #configure-the-app-entrypoint-in-pyproject-toml }
 
-You can configure where your app is located in a `pyproject.toml` file like:
+Puedes configurar dónde está tu app en un archivo `pyproject.toml` así:
 
 ```toml
 [tool.fastapi]
 entrypoint = "main:app"
 ```
 
-That `entrypoint` will tell the `fastapi` command that it should import the app like:
+Ese `entrypoint` le dirá al comando `fastapi` que debe hacer el import de la app así:
 
 ```python
 from main import app
 ```
 
-If your code was structured like:
+Si tu código estuviera estructurado así:
 
 ```
 .
@@ -173,40 +173,40 @@ If your code was structured like:
 │   ├── __init__.py
 ```
 
-Then you would set the `entrypoint` as:
+Entonces pondrías el `entrypoint` como:
 
 ```toml
 [tool.fastapi]
 entrypoint = "backend.main:app"
 ```
 
-which would be equivalent to:
+lo cual sería equivalente a:
 
 ```python
 from backend.main import app
 ```
 
-### `fastapi dev` with path or with `--entrypoint` CLI option { #fastapi-dev-with-path-or-with-entrypoint-cli-option }
+### `fastapi dev` con path o con la opción de CLI `--entrypoint` { #fastapi-dev-with-path-or-with-entrypoint-cli-option }
 
-You can also pass the file path to the `fastapi dev` command, and it will guess the FastAPI app object to use:
+También puedes pasar el path del archivo al comando `fastapi dev`, y adivinará el objeto app de FastAPI que debe usar:
 
 ```console
 $ uv run fastapi dev main.py
 ```
 
-Or, you can also pass the `--entrypoint` option to the `fastapi dev` command:
+O, también puedes pasar la opción `--entrypoint` al comando `fastapi dev`:
 
 ```console
 $ uv run fastapi dev --entrypoint main:app
 ```
 
-But you would have to remember to pass the correct path\entrypoint every time you call the `fastapi` command.
+Pero tendrías que recordar pasar el path\entrypoint correcto cada vez que llames al comando `fastapi`.
 
-Additionally, other tools might not be able to find it, for example the [VS Code Extension](../editor-support.md) or [FastAPI Cloud](https://fastapicloud.com), so it is recommended to use the `entrypoint` in `pyproject.toml`.
+Además, otras herramientas podrían no ser capaces de encontrarlo, por ejemplo la [Extensión de VS Code](../editor-support.md) o [FastAPI Cloud](https://fastapicloud.com), así que se recomienda usar el `entrypoint` en `pyproject.toml`.
 
-### Deploy your app (optional) { #deploy-your-app-optional }
+### Despliega tu app (opcional) { #deploy-your-app-optional }
 
-You can optionally deploy your FastAPI app to [FastAPI Cloud](https://fastapicloud.com) with a single command. 🚀
+Opcionalmente puedes desplegar tu app de FastAPI en [FastAPI Cloud](https://fastapicloud.com) con un solo comando. 🚀
 
 <div class="termy">
 
@@ -222,206 +222,206 @@ Deploying to FastAPI Cloud...
 
 </div>
 
-The CLI will automatically detect your FastAPI application and deploy it to the cloud. If you are not logged in, your browser will open to complete the authentication process.
+La CLI detectará automáticamente tu aplicación de FastAPI y la desplegará en la nube. Si no has iniciado sesión, se abrirá tu navegador para completar el proceso de autenticación.
 
-That's it! Now you can access your app at that URL. ✨
+¡Eso es todo! Ahora puedes acceder a tu app en esa URL. ✨
 
-## Recap, step by step { #recap-step-by-step }
+## Recapitulación, paso a paso { #recap-step-by-step }
 
-### Step 1: import `FastAPI` { #step-1-import-fastapi }
+### Paso 1: importa `FastAPI` { #step-1-import-fastapi }
 
 {* ../../docs_src/first_steps/tutorial001_py310.py hl[1] *}
 
-`FastAPI` is a Python class that provides all the functionality for your API.
+`FastAPI` es una clase de Python que proporciona toda la funcionalidad para tu API.
 
-/// note | Technical Details
+/// note | Detalles técnicos
 
-`FastAPI` is a class that inherits directly from `Starlette`.
+`FastAPI` es una clase que hereda directamente de `Starlette`.
 
-You can use all the [Starlette](https://starlette.dev/) functionality with `FastAPI` too.
+Puedes usar toda la funcionalidad de [Starlette](https://starlette.dev/) con `FastAPI` también.
 
 ///
 
-### Step 2: create a `FastAPI` "instance" { #step-2-create-a-fastapi-instance }
+### Paso 2: crea una "instance" de `FastAPI` { #step-2-create-a-fastapi-instance }
 
 {* ../../docs_src/first_steps/tutorial001_py310.py hl[3] *}
 
-Here the `app` variable will be an "instance" of the class `FastAPI`.
+Aquí la variable `app` será una "instance" de la clase `FastAPI`.
 
-This will be the main point of interaction to create all your API.
+Este será el punto principal de interacción para crear toda tu API.
 
-### Step 3: create a *path operation* { #step-3-create-a-path-operation }
+### Paso 3: crea una *path operation* { #step-3-create-a-path-operation }
 
 #### Path { #path }
 
-"Path" here refers to the last part of the URL starting from the first `/`.
+"Path" aquí se refiere a la última parte de la URL empezando desde la primera `/`.
 
-So, in a URL like:
+Así que, en una URL como:
 
 ```
 https://example.com/items/foo
 ```
 
-...the path would be:
+...el path sería:
 
 ```
 /items/foo
 ```
 
-/// note
+/// note | Nota
 
-A "path" is also commonly called an "endpoint" or a "route".
+Un "path" también es comúnmente llamado "endpoint" o "ruta".
 
 ///
 
-While building an API, the "path" is the main way to separate "concerns" and "resources".
+Mientras construyes una API, el "path" es la forma principal de separar "concerns" y "resources".
 
-#### Operation { #operation }
+#### Operación { #operation }
 
-"Operation" here refers to one of the HTTP "methods".
+"Operación" aquí se refiere a uno de los "métodos" HTTP.
 
-One of:
+Uno de:
 
 * `POST`
 * `GET`
 * `PUT`
 * `DELETE`
 
-...and the more exotic ones:
+...y los más exóticos:
 
 * `OPTIONS`
 * `HEAD`
 * `PATCH`
 * `TRACE`
 
-In the HTTP protocol, you can communicate to each path using one (or more) of these "methods".
+En el protocolo HTTP, puedes comunicarte con cada path usando uno (o más) de estos "métodos".
 
 ---
 
-When building APIs, you normally use these specific HTTP methods to perform a specific action.
+Al construir APIs, normalmente usas estos métodos HTTP específicos para realizar una acción específica.
 
-Normally you use:
+Normalmente usas:
 
-* `POST`: to create data.
-* `GET`: to read data.
-* `PUT`: to update data.
-* `DELETE`: to delete data.
+* `POST`: para crear datos.
+* `GET`: para leer datos.
+* `PUT`: para actualizar datos.
+* `DELETE`: para eliminar datos.
 
-So, in OpenAPI, each of the HTTP methods is called an "operation".
+Así que, en OpenAPI, cada uno de los métodos HTTP se llama una "operación".
 
-We are going to call them "**operations**" too.
+Vamos a llamarlas "**operaciones**" también.
 
-#### Define a *path operation decorator* { #define-a-path-operation-decorator }
+#### Define un *path operation decorator* { #define-a-path-operation-decorator }
 
 {* ../../docs_src/first_steps/tutorial001_py310.py hl[6] *}
 
-The `@app.get("/")` tells **FastAPI** that the function right below is in charge of handling requests that go to:
+El `@app.get("/")` le dice a **FastAPI** que la función justo debajo se encarga de manejar requests que vayan a:
 
-* the path `/`
-* using a <dfn title="an HTTP GET method"><code>get</code> operation</dfn>
+* el path `/`
+* usando una <dfn title="un método HTTP GET"><code>get</code> operación</dfn>
 
-/// note | `@decorator` Info
+/// note | Información sobre `@decorator`
 
-That `@something` syntax in Python is called a "decorator".
+Esa sintaxis `@algo` en Python se llama un "decorador".
 
-You put it on top of a function. Like a pretty decorative hat (I guess that's where the term came from).
+Lo pones encima de una función. Como un bonito sombrero decorativo (supongo que de ahí viene el término).
 
-A "decorator" takes the function below and does something with it.
+Un "decorador" toma la función de abajo y hace algo con ella.
 
-In our case, this decorator tells **FastAPI** that the function below corresponds to the **path** `/` with an **operation** `get`.
+En nuestro caso, este decorador le dice a **FastAPI** que la función de abajo corresponde al **path** `/` con una **operation** `get`.
 
-It is the "**path operation decorator**".
+Es el "**path operation decorator**".
 
 ///
 
-You can also use the other operations:
+También puedes usar las otras operaciones:
 
 * `@app.post()`
 * `@app.put()`
 * `@app.delete()`
 
-And the more exotic ones:
+Y los más exóticos:
 
 * `@app.options()`
 * `@app.head()`
 * `@app.patch()`
 * `@app.trace()`
 
-/// tip
+/// tip | Consejo
 
-You are free to use each operation (HTTP method) as you wish.
+Eres libre de usar cada operación (método HTTP) como quieras.
 
-**FastAPI** doesn't enforce any specific meaning.
+**FastAPI** no fuerza ningún significado específico.
 
-The information here is presented as a guideline, not a requirement.
+La información aquí se presenta como una guía, no un requisito.
 
-For example, when using GraphQL you normally perform all the actions using only `POST` operations.
+Por ejemplo, cuando usas GraphQL normalmente realizas todas las acciones usando solo operaciones `POST`.
 
 ///
 
-### Step 4: define the **path operation function** { #step-4-define-the-path-operation-function }
+### Paso 4: define la **path operation function** { #step-4-define-the-path-operation-function }
 
-This is our "**path operation function**":
+Esta es nuestra "**path operation function**":
 
-* **path**: is `/`.
-* **operation**: is `get`.
-* **function**: is the function below the "decorator" (below `@app.get("/")`).
+* **path**: es `/`.
+* **operation**: es `get`.
+* **function**: es la función debajo del "decorador" (debajo de `@app.get("/")`).
 
 {* ../../docs_src/first_steps/tutorial001_py310.py hl[7] *}
 
-This is a Python function.
+Esta es una función de Python.
 
-It will be called by **FastAPI** whenever it receives a request to the URL "`/`" using a `GET` operation.
+Será llamada por **FastAPI** cuando reciba un request en la URL "`/`" usando una operación `GET`.
 
-In this case, it is an `async` function.
+En este caso, es una función `async`.
 
 ---
 
-You could also define it as a normal function instead of `async def`:
+También podrías definirla como una función normal en lugar de `async def`:
 
 {* ../../docs_src/first_steps/tutorial003_py310.py hl[7] *}
 
-/// note
+/// note | Nota
 
-If you don't know the difference, check the [Async: *"In a hurry?"*](../async.md#in-a-hurry).
+Si no sabes la diferencia, Revisa la sección [Async: *"¿Tienes prisa?"*](../async.md#in-a-hurry).
 
 ///
 
-### Step 5: return the content { #step-5-return-the-content }
+### Paso 5: retorna el contenido { #step-5-return-the-content }
 
 {* ../../docs_src/first_steps/tutorial001_py310.py hl[8] *}
 
-You can return a `dict`, `list`, singular values as `str`, `int`, etc.
+Puedes retornar un `dict`, `list`, valores singulares como `str`, `int`, etc.
 
-You can also return Pydantic models (you'll see more about that later).
+También puedes retornar modelos de Pydantic (verás más sobre eso más adelante).
 
-There are many other objects and models that will be automatically converted to JSON (including ORMs, etc). Try using your favorite ones, it's highly probable that they are already supported.
+Hay muchos otros objetos y modelos que serán automáticamente convertidos a JSON (incluyendo ORMs, etc). Intenta usar tus favoritos, es altamente probable que ya sean compatibles.
 
-### Step 6: Deploy it { #step-6-deploy-it }
+### Paso 6: Despliégalo { #step-6-deploy-it }
 
-Deploy your app to **[FastAPI Cloud](https://fastapicloud.com)** with one command: `fastapi deploy`. 🎉
+Despliega tu app en **[FastAPI Cloud](https://fastapicloud.com)** con un solo comando: `fastapi deploy`. 🎉
 
-#### About FastAPI Cloud { #about-fastapi-cloud }
+#### Sobre FastAPI Cloud { #about-fastapi-cloud }
 
-**[FastAPI Cloud](https://fastapicloud.com)** is built by the same author and team behind **FastAPI**.
+**[FastAPI Cloud](https://fastapicloud.com)** está construido por el mismo autor y equipo detrás de **FastAPI**.
 
-It streamlines the process of **building**, **deploying**, and **accessing** an API with minimal effort.
+Agiliza el proceso de **construir**, **desplegar** y **acceder** a una API con el mínimo esfuerzo.
 
-It brings the same **developer experience** of building apps with FastAPI to **deploying** them to the cloud. 🎉
+Trae la misma **experiencia de desarrollador** de construir apps con FastAPI a **desplegarlas** en la nube. 🎉
 
-FastAPI Cloud is the primary sponsor and funding provider for the *FastAPI and friends* open source projects. ✨
+FastAPI Cloud es el sponsor principal y proveedor de financiación para los proyectos open source de *FastAPI and friends*. ✨
 
-#### Deploy to other cloud providers { #deploy-to-other-cloud-providers }
+#### Despliega en otros proveedores cloud { #deploy-to-other-cloud-providers }
 
-FastAPI is open source and based on standards. You can deploy FastAPI apps to any cloud provider you choose.
+FastAPI es open source y basado en estándares. Puedes desplegar apps de FastAPI en cualquier proveedor cloud que elijas.
 
-Follow your cloud provider's guides to deploy FastAPI apps with them. 🤓
+Sigue las guías de tu proveedor cloud para desplegar apps de FastAPI con ellos. 🤓
 
-## Recap { #recap }
+## Recapitulación { #recap }
 
-* Import `FastAPI`.
-* Create an `app` instance.
-* Write a **path operation decorator** using decorators like `@app.get("/")`.
-* Define a **path operation function**; for example, `def root(): ...`.
-* Run the development server using the command `fastapi dev`.
-* Optionally deploy your app with `fastapi deploy`.
+* Importa `FastAPI`.
+* Crea una instance `app`.
+* Escribe un **path operation decorator** usando decoradores como `@app.get("/")`.
+* Define una **path operation function**; por ejemplo, `def root(): ...`.
+* Ejecuta el servidor de desarrollo usando el comando `fastapi dev`.
+* Opcionalmente, despliega tu app con `fastapi deploy`.

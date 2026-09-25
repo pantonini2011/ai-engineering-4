@@ -1,11 +1,11 @@
-22:39:16 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-22:39:16 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-22:39:18 INFO __main__: Corpus BM25: 55 chunks leídos de Pinecone (namespace 'dev')
+23:46:45 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+23:46:45 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+23:46:47 INFO __main__: Corpus BM25: 65 chunks leídos de Pinecone (namespace 'dev')
 
-Consulta: How do I add CORSMiddleware with allow_origins?
+Consulta: ¿Cómo agrego CORSMiddleware con allow_origins?
 Top-5 híbrido (BM25 + Pinecone):
-  1. cors#002                   [seguridad] 'Use `CORSMiddleware`'  (de: bm25+vector)
-  2. cors#003                   [seguridad] 'CORS preflight requests'  (de: bm25+vector)
-  3. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
-  4. handling-errors#002        [errores] 'Add custom headers'  (de: bm25)
-  5. bigger-applications#006    [arquitectura] 'Another module with `APIRouter`'  (de: bm25)
+  1. cors#002                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
+  2. cors#003                   [seguridad] 'Usa `CORSMiddleware`'  (de: bm25+vector)
+  3. cors#004                   [seguridad] 'Requests de preflight CORS'  (de: bm25+vector)
+  4. middleware#001             [infraestructura] 'Middleware'  (de: bm25+vector)
+  5. cors#001                   [seguridad] 'CORS (Cross-Origin Resource Sharing)'  (de: vector)

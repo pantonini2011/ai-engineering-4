@@ -5,30 +5,31 @@ rootdir: D:\ai-engineering-4
 configfile: pytest.ini
 testpaths: tests
 plugins: anyio-4.15.1, langsmith-0.14.0
-collecting ... collected 23 items
+collecting ... collected 24 items
 
 tests/test_evaluate.py::test_metricas_por_pregunta PASSED                [  4%]
 tests/test_evaluate.py::test_precision_divide_por_k_aunque_vengan_menos_resultados PASSED [  8%]
-tests/test_evaluate.py::test_sin_acierto PASSED                          [ 13%]
-tests/test_evaluate.py::test_summarize_promedia PASSED                   [ 17%]
-tests/test_evaluate.py::test_evaluate_usa_doc_id_de_la_metadata PASSED   [ 21%]
-tests/test_evaluate.py::test_golden_set_real_tiene_5_preguntas_con_documentos_existentes PASSED [ 26%]
-tests/test_evaluate.py::test_golden_set_invalido PASSED                  [ 30%]
-tests/test_ingestion.py::test_clean_markdown_quita_anclas_e_includes PASSED [ 34%]
-tests/test_ingestion.py::test_section_at_devuelve_ultimo_encabezado_previo PASSED [ 39%]
-tests/test_ingestion.py::test_load_documents_asigna_doc_id_fuente_y_categoria PASSED [ 43%]
-tests/test_ingestion.py::test_split_documents_respeta_tamanio_y_esquema_de_metadata PASSED [ 47%]
-tests/test_ingestion.py::test_upsert_por_lotes_con_texto_en_metadata PASSED [ 52%]
-tests/test_ingestion.py::test_upsert_rechaza_dimension_incorrecta PASSED [ 56%]
-tests/test_ingestion.py::test_upsert_reintenta_errores_transitorios PASSED [ 60%]
-tests/test_ingestion.py::test_upsert_se_rinde_tras_max_reintentos PASSED [ 65%]
-tests/test_ingestion.py::test_namespace_count_lee_stats_del_namespace PASSED [ 69%]
-tests/test_rag_system.py::test_tokenizer_conserva_identificadores_y_quita_stopwords PASSED [ 73%]
-tests/test_rag_system.py::test_bm25_matchea_nombres_tecnicos_exactos PASSED [ 78%]
-tests/test_rag_system.py::test_corpus_bm25_se_reconstruye_desde_metadata_de_pinecone PASSED [ 82%]
-tests/test_setup_index.py::test_crea_indice_serverless_si_no_existe PASSED [ 86%]
+tests/test_evaluate.py::test_sin_acierto PASSED                          [ 12%]
+tests/test_evaluate.py::test_summarize_promedia PASSED                   [ 16%]
+tests/test_evaluate.py::test_evaluate_usa_doc_id_de_la_metadata PASSED   [ 20%]
+tests/test_evaluate.py::test_golden_set_real_tiene_5_preguntas_con_documentos_existentes PASSED [ 25%]
+tests/test_evaluate.py::test_golden_set_invalido PASSED                  [ 29%]
+tests/test_ingestion.py::test_clean_markdown_quita_anclas_e_includes PASSED [ 33%]
+tests/test_ingestion.py::test_section_at_devuelve_ultimo_encabezado_previo PASSED [ 37%]
+tests/test_ingestion.py::test_load_documents_asigna_doc_id_fuente_y_categoria PASSED [ 41%]
+tests/test_ingestion.py::test_split_documents_respeta_tamanio_y_esquema_de_metadata PASSED [ 45%]
+tests/test_ingestion.py::test_upsert_por_lotes_con_texto_en_metadata PASSED [ 50%]
+tests/test_ingestion.py::test_upsert_rechaza_dimension_incorrecta PASSED [ 54%]
+tests/test_ingestion.py::test_upsert_reintenta_errores_transitorios PASSED [ 58%]
+tests/test_ingestion.py::test_upsert_se_rinde_tras_max_reintentos PASSED [ 62%]
+tests/test_ingestion.py::test_namespace_count_lee_stats_del_namespace PASSED [ 66%]
+tests/test_rag_system.py::test_tokenizer_conserva_identificadores_y_quita_stopwords PASSED [ 70%]
+tests/test_rag_system.py::test_tokenizer_ignora_tildes PASSED            [ 75%]
+tests/test_rag_system.py::test_bm25_matchea_nombres_tecnicos_exactos PASSED [ 79%]
+tests/test_rag_system.py::test_corpus_bm25_se_reconstruye_desde_metadata_de_pinecone PASSED [ 83%]
+tests/test_setup_index.py::test_crea_indice_serverless_si_no_existe PASSED [ 87%]
 tests/test_setup_index.py::test_no_recrea_indice_existente PASSED        [ 91%]
 tests/test_setup_index.py::test_detecta_mismatch_de_dimensiones PASSED   [ 95%]
 tests/test_setup_index.py::test_detecta_metrica_distinta PASSED          [100%]
 
-============================= 23 passed in 2.45s ==============================
+============================= 24 passed in 2.46s ==============================

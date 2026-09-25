@@ -1,4 +1,4 @@
-22:38:50 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
-22:38:50 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
-22:38:51 INFO __main__: 12 documentos -> 55 chunks (tokens por chunk: min=68, prom=433, max=596)
-22:38:51 INFO __main__: Namespace 'dev' ya tiene 55 vectores (= chunks actuales): se omite la re-ingesta. Usá --reset para forzarla.
+23:46:31 INFO src.setup_index: El índice 'fastapi-docs-rag' ya existe: no se recrea.
+23:46:31 INFO src.setup_index: Índice 'fastapi-docs-rag' listo: dimension=1536, metric=cosine, host=fastapi-docs-rag-nkxjgqa.svc.aped-4627-b74a.pinecone.io
+23:46:31 INFO __main__: 12 documentos -> 65 chunks (tokens por chunk: min=33, prom=427, max=592)
+23:46:32 INFO __main__: Namespace 'dev' ya tiene 65 vectores (= chunks actuales): se omite la re-ingesta. Usá --reset para forzarla.

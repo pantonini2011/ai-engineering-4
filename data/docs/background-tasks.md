@@ -1,86 +1,86 @@
-# Background Tasks { #background-tasks }
+# Tareas en Segundo Plano { #background-tasks }
 
-You can define background tasks to be run *after* returning a response.
+Puedes definir tareas en segundo plano para que se ejecuten *después* de devolver un response.
 
-This is useful for operations that need to happen after a request, but that the client doesn't really have to be waiting for the operation to complete before receiving the response.
+Esto es útil para operaciones que necesitan ocurrir después de un request, pero para las que el cliente realmente no necesita esperar a que la operación termine antes de recibir el response.
 
-This includes, for example:
+Esto incluye, por ejemplo:
 
-* Email notifications sent after performing an action:
-    * As connecting to an email server and sending an email tends to be "slow" (several seconds), you can return the response right away and send the email notification in the background.
-* Processing data:
-    * For example, let's say you receive a file that must go through a slow process, you can return a response of "Accepted" (HTTP 202) and process the file in the background.
+* Notificaciones por email enviadas después de realizar una acción:
+  * Como conectarse a un servidor de email y enviar un email tiende a ser "lento" (varios segundos), puedes devolver el response de inmediato y enviar la notificación por email en segundo plano.
+* Procesamiento de datos:
+  * Por ejemplo, supongamos que recibes un archivo que debe pasar por un proceso lento, puedes devolver un response de "Accepted" (HTTP 202) y procesar el archivo en segundo plano.
 
-## Using `BackgroundTasks` { #using-backgroundtasks }
+## Usando `BackgroundTasks` { #using-backgroundtasks }
 
-First, import `BackgroundTasks` and define a parameter in your *path operation function* with a type declaration of `BackgroundTasks`:
+Primero, importa `BackgroundTasks` y define un parámetro en tu *path operation function* con una declaración de tipo de `BackgroundTasks`:
 
 {* ../../docs_src/background_tasks/tutorial001_py310.py hl[1,13] *}
 
-**FastAPI** will create the object of type `BackgroundTasks` for you and pass it as that parameter.
+**FastAPI** creará el objeto de tipo `BackgroundTasks` por ti y lo pasará como ese parámetro.
 
-## Create a task function { #create-a-task-function }
+## Crea una función de tarea { #create-a-task-function }
 
-Create a function to be run as the background task.
+Crea una función para que se ejecute como la tarea en segundo plano.
 
-It is just a standard function that can receive parameters.
+Es solo una función estándar que puede recibir parámetros.
 
-It can be an `async def` or normal `def` function, **FastAPI** will know how to handle it correctly.
+Puede ser una función `async def` o una función normal `def`, **FastAPI** sabrá cómo manejarla correctamente.
 
-In this case, the task function will write to a file (simulating sending an email).
+En este caso, la función de tarea escribirá en un archivo (simulando el envío de un email).
 
-And as the write operation doesn't use `async` and `await`, we define the function with normal `def`:
+Y como la operación de escritura no usa `async` y `await`, definimos la función con un `def` normal:
 
 {* ../../docs_src/background_tasks/tutorial001_py310.py hl[6:9] *}
 
-## Add the background task { #add-the-background-task }
+## Agrega la tarea en segundo plano { #add-the-background-task }
 
-Inside of your *path operation function*, pass your task function to the *background tasks* object with the method `.add_task()`:
+Dentro de tu *path operation function*, pasa tu función de tarea al objeto de *tareas en segundo plano* con el método `.add_task()`:
 
 {* ../../docs_src/background_tasks/tutorial001_py310.py hl[14] *}
 
-`.add_task()` receives as arguments:
+`.add_task()` recibe como argumentos:
 
-* A task function to be run in the background (`write_notification`).
-* Any sequence of arguments that should be passed to the task function in order (`email`).
-* Any keyword arguments that should be passed to the task function (`message="some notification"`).
+* Una función de tarea para ejecutar en segundo plano (`write_notification`).
+* Cualquier secuencia de argumentos que deba pasarse a la función de tarea en orden (`email`).
+* Cualquier argumento de palabras clave que deba pasarse a la función de tarea (`message="some notification"`).
 
-## Dependency Injection { #dependency-injection }
+## Inyección de Dependencias { #dependency-injection }
 
-Using `BackgroundTasks` also works with the dependency injection system, you can declare a parameter of type `BackgroundTasks` at multiple levels: in a *path operation function*, in a dependency (dependable), in a sub-dependency, etc.
+Usar `BackgroundTasks` también funciona con el sistema de inyección de dependencias, puedes declarar un parámetro de tipo `BackgroundTasks` en varios niveles: en una *path operation function*, en una dependencia (dependable), en una sub-dependencia, etc.
 
-**FastAPI** knows what to do in each case and how to reuse the same object, so that all the background tasks are merged together and are run in the background afterwards:
+**FastAPI** sabe qué hacer en cada caso y cómo reutilizar el mismo objeto, de modo que todas las tareas en segundo plano se combinan y ejecutan en segundo plano después:
 
 
 {* ../../docs_src/background_tasks/tutorial002_an_py310.py hl[13,15,22,25] *}
 
 
-In this example, the messages will be written to the `log.txt` file *after* the response is sent.
+En este ejemplo, los mensajes se escribirán en el archivo `log.txt` *después* de que se envíe el response.
 
-If there was a query in the request, it will be written to the log in a background task.
+Si hay un query en el request, se escribirá en el log en una tarea en segundo plano.
 
-And then another background task generated at the *path operation function* will write a message using the `email` path parameter.
+Y luego otra tarea en segundo plano generada en la *path operation function* escribirá un mensaje usando el parámetro de path `email`.
 
-## Technical Details { #technical-details }
+## Detalles Técnicos { #technical-details }
 
-The class `BackgroundTasks` comes directly from [`starlette.background`](https://starlette.dev/background/).
+La clase `BackgroundTasks` proviene directamente de [`starlette.background`](https://starlette.dev/background/).
 
-It is imported/included directly into FastAPI so that you can import it from `fastapi` and avoid accidentally importing the alternative `BackgroundTask` (without the `s` at the end) from `starlette.background`.
+Se importa/incluye directamente en FastAPI para que puedas importarla desde `fastapi` y evitar importar accidentalmente la alternativa `BackgroundTask` (sin la `s` al final) de `starlette.background`.
 
-By only using `BackgroundTasks` (and not `BackgroundTask`), it's then possible to use it as a *path operation function* parameter and have **FastAPI** handle the rest for you, just like when using the `Request` object directly.
+Al usar solo `BackgroundTasks` (y no `BackgroundTask`), es posible usarla como un parámetro de *path operation function* y dejar que **FastAPI** maneje el resto por ti, tal como cuando usas el objeto `Request` directamente.
 
-It's still possible to use `BackgroundTask` alone in FastAPI, but you have to create the object in your code and return a Starlette `Response` including it.
+Todavía es posible usar `BackgroundTask` solo en FastAPI, pero debes crear el objeto en tu código y devolver una `Response` de Starlette incluyéndolo.
 
-You can see more details in [Starlette's official docs for Background Tasks](https://starlette.dev/background/).
+Puedes ver más detalles en [la documentación oficial de Starlette sobre Background Tasks](https://starlette.dev/background/).
 
-## Caveat { #caveat }
+## Advertencia { #caveat }
 
-If you need to perform heavy background computation and you don't necessarily need it to be run by the same process (for example, you don't need to share memory, variables, etc), you might benefit from using other bigger tools like [Celery](https://docs.celeryq.dev).
+Si necesitas realizar una computación intensa en segundo plano y no necesariamente necesitas que se ejecute por el mismo proceso (por ejemplo, no necesitas compartir memoria, variables, etc.), podrías beneficiarte del uso de otras herramientas más grandes como [Celery](https://docs.celeryq.dev).
 
-They tend to require more complex configurations, a message/job queue manager, like RabbitMQ or Redis, but they allow you to run background tasks in multiple processes, and especially, in multiple servers.
+Tienden a requerir configuraciones más complejas, un gestor de cola de mensajes/trabajos, como RabbitMQ o Redis, pero te permiten ejecutar tareas en segundo plano en múltiples procesos, y especialmente, en múltiples servidores.
 
-But if you need to access variables and objects from the same **FastAPI** app, or you need to perform small background tasks (like sending an email notification), you can simply just use `BackgroundTasks`.
+Pero si necesitas acceder a variables y objetos de la misma app de **FastAPI**, o necesitas realizar pequeñas tareas en segundo plano (como enviar una notificación por email), simplemente puedes usar `BackgroundTasks`.
 
-## Recap { #recap }
+## Resumen { #recap }
 
-Import and use `BackgroundTasks` with parameters in *path operation functions* and dependencies to add background tasks.
+Importa y usa `BackgroundTasks` con parámetros en *path operation functions* y dependencias para agregar tareas en segundo plano.

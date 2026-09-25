@@ -7,22 +7,26 @@ from src.rag_system import bm25_tokenize, load_corpus_from_pinecone
 
 
 def test_tokenizer_conserva_identificadores_y_quita_stopwords():
-    assert bm25_tokenize("How do I use `add_middleware`, CORSMiddleware?") == [
-        "add_middleware", "corsmiddleware",
+    assert bm25_tokenize("¿Cómo uso `add_middleware` con CORSMiddleware?") == [
+        "uso", "add_middleware", "corsmiddleware",
     ]
+
+
+def test_tokenizer_ignora_tildes():
+    assert bm25_tokenize("configuración") == bm25_tokenize("configuracion") == ["configuracion"]
 
 
 def test_bm25_matchea_nombres_tecnicos_exactos():
     # Con 2 documentos el IDF de BM25Okapi para un término que aparece en 1
     # vale log(1.5/1.5) = 0: hace falta un corpus mínimamente realista.
     corpus = [
-        Document(page_content="Use HTTPException to return errors", metadata={"chunk_id": "a"}),
-        Document(page_content="Declare a request body with Pydantic", metadata={"chunk_id": "b"}),
-        Document(page_content="Add CORSMiddleware to allow origins", metadata={"chunk_id": "c"}),
-        Document(page_content="Run background tasks after the response", metadata={"chunk_id": "d"}),
+        Document(page_content="Usa HTTPException para devolver errores", metadata={"chunk_id": "a"}),
+        Document(page_content="Declara un request body con Pydantic", metadata={"chunk_id": "b"}),
+        Document(page_content="Agrega CORSMiddleware para permitir orígenes", metadata={"chunk_id": "c"}),
+        Document(page_content="Ejecuta tareas en segundo plano después del response", metadata={"chunk_id": "d"}),
     ]
     bm25 = BM25Retriever.from_documents(corpus, preprocess_func=bm25_tokenize, k=1)
-    assert bm25.invoke("raise an HTTPException")[0].metadata["chunk_id"] == "a"
+    assert bm25.invoke("¿cómo lanzo una HTTPException?")[0].metadata["chunk_id"] == "a"
 
 
 class FakeIndex:

@@ -1,89 +1,89 @@
 # CORS (Cross-Origin Resource Sharing) { #cors-cross-origin-resource-sharing }
 
-[CORS or "Cross-Origin Resource Sharing"](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) refers to the situations when a frontend running in a browser has JavaScript code that communicates with a backend, and the backend is in a different "origin" than the frontend.
+[CORS o "Cross-Origin Resource Sharing"](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) se refiere a situaciones en las que un frontend que se ejecuta en un navegador tiene código JavaScript que se comunica con un backend, y el backend está en un "origen" diferente al frontend.
 
-## Origin { #origin }
+## Origen { #origin }
 
-An origin is the combination of protocol (`http`, `https`), domain (`myapp.com`, `localhost`, `localhost.tiangolo.com`), and port (`80`, `443`, `8080`).
+Un origen es la combinación de protocolo (`http`, `https`), dominio (`myapp.com`, `localhost`, `localhost.tiangolo.com`) y puerto (`80`, `443`, `8080`).
 
-So, all these are different origins:
+Así que, todos estos son orígenes diferentes:
 
 * `http://localhost`
 * `https://localhost`
 * `http://localhost:8080`
 
-Even if they are all in `localhost`, they use different protocols or ports, so, they are different "origins".
+Aunque todos están en `localhost`, usan protocolos o puertos diferentes, por lo tanto, son "orígenes" diferentes.
 
-## Steps { #steps }
+## Pasos { #steps }
 
-So, let's say you have a frontend running in your browser at `http://localhost:8080`, and its JavaScript is trying to communicate with a backend running at `http://localhost` (because we don't specify a port, the browser will assume the default port `80`).
+Entonces, digamos que tienes un frontend corriendo en tu navegador en `http://localhost:8080`, y su JavaScript está tratando de comunicarse con un backend corriendo en `http://localhost` (porque no especificamos un puerto, el navegador asumirá el puerto por defecto `80`).
 
-Then, the browser will send an HTTP `OPTIONS` request to the `:80`-backend, and if the backend sends the appropriate headers authorizing the communication from this different origin (`http://localhost:8080`) then the `:8080`-browser will let the JavaScript in the frontend send its request to the `:80`-backend.
+Entonces, el navegador enviará un request HTTP `OPTIONS` al backend `:80`, y si el backend envía los headers apropiados autorizando la comunicación desde este origen diferente (`http://localhost:8080`), entonces el navegador `:8080` permitirá que el JavaScript en el frontend envíe su request al backend `:80`.
 
-To achieve this, the `:80`-backend must have a list of "allowed origins".
+Para lograr esto, el backend `:80` debe tener una lista de "orígenes permitidos".
 
-In this case, the list would have to include `http://localhost:8080` for the `:8080`-frontend to work correctly.
+En este caso, la lista tendría que incluir `http://localhost:8080` para que el frontend `:8080` funcione correctamente.
 
-## Wildcards { #wildcards }
+## Comodines { #wildcards }
 
-It's also possible to declare the list as `"*"` (a "wildcard") to say that all are allowed.
+También es posible declarar la lista como `"*"` (un "comodín") para decir que todos están permitidos.
 
-But that will only allow certain types of communication, excluding everything that involves credentials: Cookies, Authorization headers like those used with Bearer Tokens, etc.
+Pero eso solo permitirá ciertos tipos de comunicación, excluyendo todo lo que implique credenciales: Cookies, headers de autorización como los utilizados con Bearer Tokens, etc.
 
-So, for everything to work correctly, it's better to specify explicitly the allowed origins.
+Así que, para que todo funcione correctamente, es mejor especificar explícitamente los orígenes permitidos.
 
-## Use `CORSMiddleware` { #use-corsmiddleware }
+## Usa `CORSMiddleware` { #use-corsmiddleware }
 
-You can configure it in your **FastAPI** application using the `CORSMiddleware`.
+Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMiddleware`.
 
-* Import `CORSMiddleware`.
-* Create a list of allowed origins (as strings).
-* Add it as a "middleware" to your **FastAPI** application.
+* Importa `CORSMiddleware`.
+* Crea una lista de orígenes permitidos (como strings).
+* Agrégalo como un "middleware" a tu aplicación **FastAPI**.
 
-You can also specify whether your backend allows:
+También puedes especificar si tu backend permite:
 
-* Credentials (Authorization headers, Cookies, etc).
-* Specific HTTP methods (`POST`, `PUT`) or all of them with the wildcard `"*"`.
-* Specific HTTP headers or all of them with the wildcard `"*"`.
+* Credenciales (headers de autorización, cookies, etc).
+* Métodos HTTP específicos (`POST`, `PUT`) o todos ellos con el comodín `"*"`.
+* Headers HTTP específicos o todos ellos con el comodín `"*"`.
 
 {* ../../docs_src/cors/tutorial001_py310.py hl[2,6:11,13:19] *}
 
 
-The default parameters used by the `CORSMiddleware` implementation are restrictive by default, so you'll need to explicitly enable particular origins, methods, or headers, in order for browsers to be permitted to use them in a Cross-Domain context.
+Los parámetros predeterminados utilizados por la implementación de `CORSMiddleware` son restrictivos por defecto, por lo que necesitarás habilitar explícitamente orígenes, métodos o headers particulares para que los navegadores estén permitidos de usarlos en un contexto de Cross-Domain.
 
-The following arguments are supported:
+Se admiten los siguientes argumentos:
 
-* `allow_origins` - A list of origins that should be permitted to make cross-origin requests. E.g. `['https://example.org', 'https://www.example.org']`. You can use `['*']` to allow any origin.
-* `allow_origin_regex` - A regex string to match against origins that should be permitted to make cross-origin requests. e.g. `'https://.*\.example\.org'`.
-* `allow_methods` - A list of HTTP methods that should be allowed for cross-origin requests. Defaults to `['GET']`. You can use `['*']` to allow all standard methods.
-* `allow_headers` - A list of HTTP request headers that should be supported for cross-origin requests. Defaults to `[]`. You can use `['*']` to allow all headers. The `Accept`, `Accept-Language`, `Content-Language` and `Content-Type` headers are always allowed for [simple CORS requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests).
-* `allow_credentials` - Indicate that cookies should be supported for cross-origin requests. Defaults to `False`.
+* `allow_origins` - Una lista de orígenes que deberían estar permitidos para hacer requests cross-origin. Por ejemplo, `['https://example.org', 'https://www.example.org']`. Puedes usar `['*']` para permitir cualquier origen.
+* `allow_origin_regex` - Una cadena regex para coincidir con orígenes que deberían estar permitidos para hacer requests cross-origin. por ejemplo, `'https://.*\.example\.org'`.
+* `allow_methods` - Una lista de métodos HTTP que deberían estar permitidos para requests cross-origin. Por defecto es `['GET']`. Puedes usar `['*']` para permitir todos los métodos estándar.
+* `allow_headers` - Una lista de headers de request HTTP que deberían estar soportados para requests cross-origin. Por defecto es `[]`. Puedes usar `['*']` para permitir todos los headers. Los headers `Accept`, `Accept-Language`, `Content-Language` y `Content-Type` siempre están permitidos para [requests CORS simples](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests).
+* `allow_credentials` - Indica que las cookies deberían estar soportadas para requests cross-origin. Por defecto es `False`.
 
-    None of `allow_origins`, `allow_methods` and `allow_headers` can be set to `['*']` if `allow_credentials` is set to `True`. All of them must be [explicitly specified](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#credentialed_requests_and_wildcards).
+    Ninguno de `allow_origins`, `allow_methods` y `allow_headers` puede establecerse a `['*']` si `allow_credentials` está configurado a `True`. Todos deben ser [especificados explícitamente](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#credentialed_requests_and_wildcards).
 
-* `expose_headers` - Indicate any response headers that should be made accessible to the browser. Defaults to `[]`.
-* `max_age` - Sets a maximum time in seconds for browsers to cache CORS responses. Defaults to `600`.
+* `expose_headers` - Indica cualquier header de response que debería ser accesible para el navegador. Por defecto es `[]`.
+* `max_age` - Establece un tiempo máximo en segundos para que los navegadores almacenen en caché los responses CORS. Por defecto es `600`.
 
-The middleware responds to two particular types of HTTP request...
+El middleware responde a dos tipos particulares de request HTTP...
 
-### CORS preflight requests { #cors-preflight-requests }
+### Requests de preflight CORS { #cors-preflight-requests }
 
-These are any `OPTIONS` request with `Origin` and `Access-Control-Request-Method` headers.
+Estos son cualquier request `OPTIONS` con headers `Origin` y `Access-Control-Request-Method`.
 
-In this case the middleware will intercept the incoming request and respond with appropriate CORS headers, and either a `200` or `400` response for informational purposes.
+En este caso, el middleware interceptará el request entrante y responderá con los headers CORS adecuados, y un response `200` o `400` con fines informativos.
 
-### Simple requests { #simple-requests }
+### Requests simples { #simple-requests }
 
-Any request with an `Origin` header. In this case the middleware will pass the request through as normal, but will include appropriate CORS headers on the response.
+Cualquier request con un header `Origin`. En este caso, el middleware pasará el request a través de lo normal, pero incluirá los headers CORS adecuados en el response.
 
-## More info { #more-info }
+## Más info { #more-info }
 
-For more info about <abbr title="Cross-Origin Resource Sharing">CORS</abbr>, check the [Mozilla CORS documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
+Para más información sobre <abbr title="Cross-Origin Resource Sharing">CORS</abbr>, revisa la [documentación de CORS de Mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
 
-/// note | Technical Details
+/// note | Detalles Técnicos
 
-You could also use `from starlette.middleware.cors import CORSMiddleware`.
+También podrías usar `from starlette.middleware.cors import CORSMiddleware`.
 
-**FastAPI** provides several middlewares in `fastapi.middleware` just as a convenience for you, the developer. But most of the available middlewares come directly from Starlette.
+**FastAPI** proporciona varios middlewares en `fastapi.middleware` como una conveniencia para ti, el desarrollador. Pero la mayoría de los middlewares disponibles provienen directamente de Starlette.
 
 ///
