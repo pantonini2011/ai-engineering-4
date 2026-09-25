@@ -55,4 +55,4 @@ tests/test_setup_index.py::test_no_recrea_indice_existente PASSED        [ 95%]
 tests/test_setup_index.py::test_detecta_mismatch_de_dimensiones PASSED   [ 97%]
 tests/test_setup_index.py::test_detecta_metrica_distinta PASSED          [100%]
 
-============================= 47 passed in 2.87s ==============================
+============================= 47 passed in 3.08s ==============================
