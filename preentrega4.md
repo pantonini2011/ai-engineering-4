@@ -1,42 +1,42 @@
 Pre-entrega 4: Sistema RAG escalable en la nube con Pinecone
-Qué construir
-Debes entregar un Módulo de Recuperación Escalable integrado en un repositorio de código. El artefacto principal es un servicio (o conjunto de scripts organizados) en Python que ejecute el flujo completo de un sistema RAG en la nube.
+QuÃ© construir
+Debes entregar un MÃ³dulo de RecuperaciÃ³n Escalable integrado en un repositorio de cÃ³digo. El artefacto principal es un servicio (o conjunto de scripts organizados) en Python que ejecute el flujo completo de un sistema RAG en la nube.
 
 Componentes obligatorios:
-Pipeline de Ingesta en Pinecone: Un script que tome un conjunto de documentos (PDFs, Markdown o JSON), los procese y los suba a un índice de Pinecone Serverless utilizando metadatos avanzados (fuente, página, etiquetas de categoría).
-Recuperador Híbrido (Hybrid Retriever): Una implementación que combine búsqueda por similitud de vectores con búsqueda léxica (BM25) para mejorar la precisión en términos técnicos o nombres propios.
-Script de Evaluación: Una utilidad que calcule al menos dos métricas fundamentales (Precision@k y Recall@k) utilizando un pequeño "Golden Set" de preguntas y respuestas de prueba.
+Pipeline de Ingesta en Pinecone: Un script que tome un conjunto de documentos (PDFs, Markdown o JSON), los procese y los suba a un Ã­ndice de Pinecone Serverless utilizando metadatos avanzados (fuente, pÃ¡gina, etiquetas de categorÃ­a).
+Recuperador HÃ­brido (Hybrid Retriever): Una implementaciÃ³n que combine bÃºsqueda por similitud de vectores con bÃºsqueda lÃ©xica (BM25) para mejorar la precisiÃ³n en tÃ©rminos tÃ©cnicos o nombres propios.
+Script de EvaluaciÃ³n: Una utilidad que calcule al menos dos mÃ©tricas fundamentales (Precision@k y Recall@k) utilizando un pequeÃ±o "Golden Set" de preguntas y respuestas de prueba.
 Pasos sugeridos
-Preparación de Infraestructura: Crea un índice Serverless en Pinecone (usa la dimensión 1536 si usas OpenAI text-embedding-3-small).
+PreparaciÃ³n de Infraestructura: Crea un Ã­ndice Serverless en Pinecone (usa la dimensiÃ³n 1536 si usas OpenAI text-embedding-3-small).
 Ingesta Inteligente: No subas el texto plano. Crea un esquema donde guardes el texto original dentro de los metadatos de Pinecone para evitar consultas adicionales a una base de datos relacional.
-Configuración de LangChain: Utiliza el PineconeVectorStore de LangChain o el SDK nativo de Pinecone para configurar el motor de búsqueda.
-Implementación BM25: Configura un recuperador de LangChain que use BM25Retriever y combínalo con el de Pinecone usando un EnsembleRetriever.
-Evaluación Local: Crea un pequeño archivo JSON con pares {"pregunta": "...", "documento_id_esperado": "..."} y mide cuántos de esos documentos aparecen efectivamente en el Top-5 recuperado.
+ConfiguraciÃ³n de LangChain: Utiliza el PineconeVectorStore de LangChain o el SDK nativo de Pinecone para configurar el motor de bÃºsqueda.
+ImplementaciÃ³n BM25: Configura un recuperador de LangChain que use BM25Retriever y combÃ­nalo con el de Pinecone usando un EnsembleRetriever.
+EvaluaciÃ³n Local: Crea un pequeÃ±o archivo JSON con pares {"pregunta": "...", "documento_id_esperado": "..."} y mide cuÃ¡ntos de esos documentos aparecen efectivamente en el Top-5 recuperado.
 Errores comunes a evitar
-Mismatch de Dimensiones: Intentar subir embeddings de 1536 dimensiones a un índice configurado con 512 o 768.
-Ignorar el Namespace: En aplicaciones multi-inquilino o con distintos tipos de datos, no usar namespaces en Pinecone hará que la búsqueda sea ruidosa y lenta.
-Subestimar el Chunking: Chunks muy pequeños pierden el contexto semántico; muy grandes diluyen la precisión del embedding. Busca un punto medio (~500-800 tokens).
-?? Qué entregás y en qué formato
+Mismatch de Dimensiones: Intentar subir embeddings de 1536 dimensiones a un Ã­ndice configurado con 512 o 768.
+Ignorar el Namespace: En aplicaciones multi-inquilino o con distintos tipos de datos, no usar namespaces en Pinecone harÃ¡ que la bÃºsqueda sea ruidosa y lenta.
+Subestimar el Chunking: Chunks muy pequeÃ±os pierden el contexto semÃ¡ntico; muy grandes diluyen la precisiÃ³n del embedding. Busca un punto medio (~500-800 tokens).
+?? QuÃ© entregÃ¡s y en quÃ© formato
 
-Tipo: ?? Código — un repositorio de GitHub.
-Artefacto concreto: repo con el pipeline de ingesta a Pinecone, el recuperador híbrido (BM25 + vectorial) y evaluate.py (Precision@k y Recall@k). El README.md debe incluir los pasos para replicar el índice.
-Qué NO hace falta: no hay PDF; el reporte de métricas se imprime en consola y se resume en el README.md.
-Repositorio de GitHub que contenga el pipeline de ingesta, el recuperador híbrido y el script de evaluación de métricas. El README debe incluir instrucciones para replicar el índice de Pinecone.
+Tipo: ?? CÃ³digo â€” un repositorio de GitHub.
+Artefacto concreto: repo con el pipeline de ingesta a Pinecone, el recuperador hÃ­brido (BM25 + vectorial) y evaluate.py (Precision@k y Recall@k). El README.md debe incluir los pasos para replicar el Ã­ndice.
+QuÃ© NO hace falta: no hay PDF; el reporte de mÃ©tricas se imprime en consola y se resume en el README.md.
+Repositorio de GitHub que contenga el pipeline de ingesta, el recuperador hÃ­brido y el script de evaluaciÃ³n de mÃ©tricas. El README debe incluir instrucciones para replicar el Ã­ndice de Pinecone.
 Entregable
 
-Configuración de variables: Crea un archivo .env con PINECONE_API_KEY, OPENAI_API_KEY (o Anthropic) e INDEX_NAME.
-Setup de Pinecone: Escribe un script de inicialización que verifique si el índice existe y lo cree si es necesario (modo Serverless).
+ConfiguraciÃ³n de variables: Crea un archivo .env con PINECONE_API_KEY, OPENAI_API_KEY (o Anthropic) e INDEX_NAME.
+Setup de Pinecone: Escribe un script de inicializaciÃ³n que verifique si el Ã­ndice existe y lo cree si es necesario (modo Serverless).
 Pipeline de Ingesta:
-Carga un dataset de documentos técnicos (puedes usar la documentación de una librería de Python).
+Carga un dataset de documentos tÃ©cnicos (puedes usar la documentaciÃ³n de una librerÃ­a de Python).
 Divide en chunks usando un RecursiveCharacterTextSplitter.
-Genera embeddings e insértalos en Pinecone incluyendo el contenido y la fuente en la metadata.
-Implementación del Recuperador:
+Genera embeddings e insÃ©rtalos en Pinecone incluyendo el contenido y la fuente en la metadata.
+ImplementaciÃ³n del Recuperador:
 Crea una clase RAGSystem que encapsule un EnsembleRetriever.
-El sistema debe recibir una consulta y devolver los top-5 documentos combinando resultados léxicos y semánticos.
-Evaluación:
+El sistema debe recibir una consulta y devolver los top-5 documentos combinando resultados lÃ©xicos y semÃ¡nticos.
+EvaluaciÃ³n:
 Crea un script evaluate.py.
 Define un benchmark de 5 preguntas donde conozcas de antemano el documento fuente.
 Ejecuta las consultas y calcula:
-Recall@5: ¿Está el documento correcto entre los 5 recuperados?
-Precision@5: ¿Qué porcentaje de los 5 recuperados son realmente útiles?
-Reporte: Imprime en consola un breve resumen de los resultados de evaluación.
+Recall@5: Â¿EstÃ¡ el documento correcto entre los 5 recuperados?
+Precision@5: Â¿QuÃ© porcentaje de los 5 recuperados son realmente Ãºtiles?
+Reporte: Imprime en consola un breve resumen de los resultados de evaluaciÃ³n.
