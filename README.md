@@ -356,6 +356,51 @@ El `score` es el score RRF combinado (ver [sección 3.3](#33-estrategia-de-recup
 0.5/61 + 0.5/61 ≈ 0.0164, que corresponde a un chunk que sale primero en los dos rankings. Un
 chunk que trae un solo recuperador no pasa de 0.5/61 ≈ 0.0082.
 
+La misma consulta con `--json` (se muestra el primero de los 5 fragmentos; la salida completa
+está en [`evidencia/08_consulta_json.txt`](evidencia/08_consulta_json.txt)):
+
+```json
+{
+  "pregunta": "¿Cómo agrego CORSMiddleware con allow_origins?",
+  "estrategia_recuperacion": "hibrida_ensemble (bm25 + pinecone_dense, RRF)",
+  "pesos": {"bm25": 0.5, "vector": 0.5},
+  "indice": "fastapi-docs-rag",
+  "namespace": "dev",
+  "filtro": null,
+  "top_k": 5,
+  "similitud_maxima": 0.749,
+  "umbral_similitud": 0.38,
+  "fragmentos_recuperados": [
+    {
+      "chunk_id": "cors#002",
+      "doc_id": "cors",
+      "fuente": "data/docs/cors.md",
+      "categoria": "seguridad",
+      "seccion": "Usa `CORSMiddleware`",
+      "page": 2,
+      "score_combinado": 0.0164,
+      "similitud_coseno": 0.749,
+      "recuperado_por": ["bm25", "vector"],
+      "extracto": "## Usa `CORSMiddleware` Puedes configurarlo en tu aplicación **FastAPI** usando el `CORSMiddleware`. * Importa `CORSMiddleware`. * Crea una lista de orígenes permitidos (como strings). * Agrégalo como..."
+    }
+  ],
+  "fuentes": ["data/docs/cors.md", "data/docs/middleware.md"]
+}
+```
+
+Una pregunta fuera de la documentación no devuelve chunks: la similitud coseno máxima queda
+por debajo de `MIN_SIMILITUD` (ver [sección 3.3](#33-estrategia-de-recuperación-híbrida-ensembleretriever);
+salida completa en [`evidencia/09_pregunta_fuera_de_dominio.txt`](evidencia/09_pregunta_fuera_de_dominio.txt)):
+
+```
+Consulta: ¿Cuando me puedo tomar vacaciones?
+Índice: fastapi-docs-rag · namespace: dev · estrategia: híbrida (BM25 + Pinecone, RRF, pesos [0.5, 0.5])
+Sin resultados relevantes: la similitud máxima (0.210) está por debajo del umbral (0.38). La pregunta parece estar fuera de la documentación indexada.
+```
+
+Con `--json`, `fragmentos_recuperados` y `fuentes` vienen vacíos, y el campo `mensaje` explica el
+motivo.
+
 La salida real de cada comando está en [`evidencia/`](evidencia/).
 
 ## 6. Resultados y evaluación
